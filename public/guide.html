@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng Dẫn Nhân Viên - Quản Lý Máy Chơi Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            background: #f8f9fa;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .step {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .example {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            color: #856404;
+        }
+
+        .tip {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            color: #155724;
+        }
+
+        .machine-screen {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .btn-back {
+            background: #6c757d;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 HƯỚNG DẪN NHÂN VIÊN</h1>
+            <p>Quản lý máy chơi game - Cách đọc màn hình và nhập liệu</p>
+        </div>
+
+        <div class="section">
+            <h2>📺 1. CÁCH ĐỌC MÀN HÌNH MÁY GAME</h2>
+            
+            <div class="step">
+                <h3>🔍 Thông tin trên màn hình máy:</h3>
+                <div class="machine-screen">
+                    [Total Record]<br>
+                    Total Profit     1320Coin<br>
+                    Last Profit      1220Coin<br>
+                    Current Profit   100Coin<br>
+                    Coin In Total    70200<br>
+                    Coin Out Total   57000<br><br>
+                    
+                    Game Serial No.  0054<br>
+                    Machine No.      65543017<br>
+                    Operation Time   20Day 7Hour<br>
+                    Played Time      0Day 0Hour<br>
+                </div>
+                
+                <div class="tip">
+                    <strong>💡 Chỉ cần chú ý 2 số quan trọng:</strong><br>
+                    • <strong>Coin In Total</strong>: Tổng xu khách nạp vào (70200)<br>
+                    • <strong>Coin Out Total</strong>: Tổng xu khách thắng (57000)<br>
+                    • <strong>Total Profit</strong>: Lãi = 70200 - 57000 = 13200 xu
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💻 2. CÁCH NHẬP LIỆU VÀO HỆ THỐNG</h2>
+            
+            <div class="step">
+                <h3>🔐 Bước 1: Đăng nhập</h3>
+                <p>1. Mở trình duyệt và vào: <strong>http://localhost:3000</strong></p>
+                <p>2. Nhập tài khoản được cấp (VD: nv001/123456)</p>
+                <p>3. Hệ thống sẽ hiển thị giao diện nhân viên</p>
+            </div>
+
+            <div class="step">
+                <h3>📝 Bước 2: Nhập dữ liệu</h3>
+                <p><strong>1. Chọn máy chơi game:</strong></p>
+                <div class="example">Dropdown sẽ hiển thị: "Máy Game 101 (Serial: 65543017)"</div>
+                
+                <p><strong>2. Chọn ngày giao dịch:</strong></p>
+                <div class="tip">Mặc định là hôm nay, nhưng có thể chọn ngày khác nếu quên nhập hôm qua</div>
+                
+                <p><strong>3. Nhập "Coin In Total":</strong></p>
+                <div class="example">Từ màn hình máy: 70200 → Nhập vào ô "💰 Coin In Total"</div>
+                
+                <p><strong>4. Nhập "Coin Out Total":</strong></p>
+                <div class="example">Từ màn hình máy: 57000 → Nhập vào ô "💸 Coin Out Total"</div>
+                
+                <p><strong>5. Kiểm tra "Total Profit":</strong></p>
+                <div class="tip">Hệ thống tự động tính: 70200 - 57000 = 13200 xu (màu xanh = lãi)</div>
+                
+                <p><strong>6. Thêm ghi chú (tùy chọn):</strong></p>
+                <div class="example">"Ca sáng", "Ca chiều", "Máy báo lỗi nhẹ", v.v.</div>
+                
+                <p><strong>7. Nhấn "💾 Lưu Giao Dịch"</strong></p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚠️ 3. LƯU Ý QUAN TRỌNG</h2>
+            
+            <div class="step">
+                <h3>🚫 Những điều CẤM làm:</h3>
+                <div class="warning">
+                    • <strong>KHÔNG</strong> nhập sai số liệu<br>
+                    • <strong>KHÔNG</strong> nhập liệu cho máy chi nhánh khác<br>
+                    • <strong>KHÔNG</strong> chia sẻ tài khoản với người khác<br>
+                    • <strong>KHÔNG</strong> quên đăng xuất sau khi làm việc
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>✅ Những điều NÊN làm:</h3>
+                <div class="tip">
+                    • <strong>KIỂM TRA</strong> kỹ số liệu trước khi lưu<br>
+                    • <strong>GHI CHÚ</strong> thông tin đặc biệt (lỗi máy, sự cố...)<br>
+                    • <strong>NHẬP LIỆU</strong> ngay sau mỗi ca làm việc<br>
+                    • <strong>BÁO CÁO</strong> ngay cho quản lý nếu có vấn đề
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 4. XỬ LÝ TÌNH HUỐNG</h2>
+            
+            <div class="step">
+                <h3>❓ Quên nhập liệu hôm qua?</h3>
+                <p>→ Chọn ngày giao dịch là hôm qua trong form nhập liệu</p>
+            </div>
+
+            <div class="step">
+                <h3>❓ Nhập sai số liệu?</h3>
+                <p>→ Liên hệ ngay với quản lý để xử lý</p>
+            </div>
+
+            <div class="step">
+                <h3>❓ Máy báo lỗi hoặc không hoạt động?</h3>
+                <p>→ Ghi chú chi tiết tình trạng máy và báo cáo quản lý</p>
+            </div>
+
+            <div class="step">
+                <h3>❓ Không đăng nhập được?</h3>
+                <p>→ Kiểm tra username/password hoặc liên hệ quản lý reset</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📞 5. LIÊN HỆ HỖ TRỢ</h2>
+            <div class="step">
+                <p><strong>Quản lý chi nhánh:</strong> [Số điện thoại]</p>
+                <p><strong>IT Support:</strong> [Email hỗ trợ]</p>
+                <p><strong>Khẩn cấp:</strong> [Hotline 24/7]</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="btn">🚀 Vào Hệ Thống</a>
+            <a href="#" onclick="window.print()" class="btn btn-back">🖨️ In Hướng Dẫn</a>
+        </div>
+    </div>
+</body>
+</html> 

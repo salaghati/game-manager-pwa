@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Quản Lý Máy Chơi Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .login-form {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .demo-accounts {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .demo-accounts h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .demo-account {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .demo-account:hover {
+            background: #e9ecef;
+        }
+
+        .demo-account span:first-child {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .demo-account span:last-child {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 0 10px;
+            }
+            
+            .login-header {
+                padding: 30px 20px;
+            }
+            
+            .login-form {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🎮 Quản Lý Máy Chơi Game</h1>
+            <p>Đăng nhập để truy cập hệ thống</p>
+        </div>
+
+        <div class="login-form">
+            <div id="alert-container"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    Đăng Nhập
+                </button>
+            </form>
+
+            <div class="demo-accounts">
+                <h3>👥 Tài khoản demo (click để đăng nhập):</h3>
+                <div class="demo-account" onclick="quickLogin('admin', '123456')">
+                    <span>admin</span>
+                    <span>Quản trị viên</span>
+                </div>
+                <div class="demo-account" onclick="quickLogin('manager1', '123456')">
+                    <span>manager1</span>
+                    <span>Quản lý Chi nhánh 1</span>
+                </div>
+                <div class="demo-account" onclick="quickLogin('nv001', '123456')">
+                    <span>nv001</span>
+                    <span>Nhân viên Chi nhánh 1</span>
+                </div>
+                <div class="demo-account" onclick="quickLogin('manager2', '123456')">
+                    <span>manager2</span>
+                    <span>Quản lý Chi nhánh 2</span>
+                </div>
+                <div class="demo-account" onclick="quickLogin('nv002', '123456')">
+                    <span>nv002</span>
+                    <span>Nhân viên Chi nhánh 2</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hiển thị thông báo
+        function showAlert(message, type = 'error') {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `<div class="alert ${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // Quick login cho demo
+        function quickLogin(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Xử lý form đăng nhập
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Disable button khi đang xử lý
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Đang đăng nhập...';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Đăng nhập thành công, chuyển về trang chính
+                    showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    showAlert(result.error || 'Đăng nhập thất bại');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Lỗi kết nối. Vui lòng thử lại.');
+            } finally {
+                // Enable lại button
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Đăng Nhập';
+            }
+        });
+
+        // Kiểm tra xem đã đăng nhập chưa
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/profile', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    // Đã đăng nhập, chuyển về trang chính
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                // Chưa đăng nhập, ở lại trang login
+            }
+        }
+
+        // Check auth khi load trang
+        checkAuth();
+    </script>
+</body>
+</html> 

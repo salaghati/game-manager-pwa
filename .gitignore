@@ -1,0 +1,18 @@
+node_modules/
+*.log
+.env
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database (Railway sẽ tự tạo)
+game_machine.db
+game_machine.db-journal
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db 

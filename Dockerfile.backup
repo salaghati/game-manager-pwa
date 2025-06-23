@@ -1,0 +1,23 @@
+# Sử dụng Node.js 18 LTS
+FROM node:18-alpine
+
+# Tạo thư mục app
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Cài đặt dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY . .
+
+# Tạo thư mục cho database
+RUN mkdir -p /app/data
+
+# Expose port
+EXPOSE 3001
+
+# Chạy ứng dụng
+CMD ["node", "server.js"] 
