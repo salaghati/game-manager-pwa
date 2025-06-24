@@ -295,8 +295,16 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
             branchId = parseInt(branch_id);
         }
         
+        console.log('🔍 Dashboard API DEBUG:');
+        console.log('User:', user.username, user.role);
+        console.log('Query params:', { branch_id, start_date, end_date });
+        console.log('Resolved branchId:', branchId);
+        
         const branchRevenue = await db.getBranchRevenue(branchId, start_date, end_date);
         const machineRevenue = await db.getRevenue(branchId, null, start_date, end_date);
+        
+        console.log('📦 Branch Revenue:', branchRevenue);
+        console.log('📦 Machine Revenue:', machineRevenue);
         
         const totalRevenue = branchRevenue.reduce((sum, branch) => sum + (branch.total_revenue || 0), 0);
         const totalCoinsIn = branchRevenue.reduce((sum, branch) => sum + (branch.total_coins_in || 0), 0);

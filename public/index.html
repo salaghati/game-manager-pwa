@@ -1309,15 +1309,24 @@
                 const endDate = document.getElementById('end_date').value;
                 const branchId = document.getElementById('dashboard_branch_id')?.value;
                 
+                // Debug dashboard params
+                console.log('🔍 loadDashboard DEBUG:');
+                console.log('Dashboard params:', { startDate, endDate, branchId });
+                console.log('Current User:', currentUser);
+                
                 const url = new URL(`${window.location.origin}/api/dashboard`);
                 if (startDate) url.searchParams.append('start_date', startDate);
                 if (endDate) url.searchParams.append('end_date', endDate);
                 if (branchId) url.searchParams.append('branch_id', branchId);
 
+                console.log('🌐 Dashboard API URL:', url.toString());
+
                 const response = await fetch(url, {
                     credentials: 'include'
                 });
                 const data = await response.json();
+                
+                console.log('📦 Dashboard API Response:', data);
 
                 // Hiển thị stats tổng quan
                 const statsGrid = document.getElementById('stats-grid');
