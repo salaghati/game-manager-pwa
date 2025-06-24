@@ -295,49 +295,30 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
             branchId = parseInt(branch_id);
         }
         
-        console.log('🔍 Dashboard API DEBUG:');
-        console.log('User:', user.username, user.role);
-        console.log('Query params:', { branch_id, start_date, end_date });
-        console.log('Resolved branchId:', branchId);
+        console.log('🔍 Dashboard API - Simple Test');
+        console.log('User:', user.username, 'Branch:', branchId);
         
-        let branchRevenue, machineRevenue;
+        // Simple hardcoded response first to test if the issue is in database queries
+        const branchRevenue = [
+            {
+                branch_id: branchId || 1,
+                branch_name: 'Chi Nhánh Quận 1',
+                total_revenue: 100,
+                total_coins_in: 50,
+                total_coins_out: 25,
+                machine_count: 2
+            }
+        ];
         
-        try {
-            // Debug: Check all transactions for this branch
-            console.log('🔍 Checking all transactions for branch:', branchId);
-            const allTransactions = await db.getTransactions(branchId, null, null, null, null, 'date_desc', 10);
-            console.log('📦 All Transactions (last 10):', allTransactions);
-        } catch (transactionError) {
-            console.error('❌ Error getting transactions:', transactionError);
-        }
-        
-        try {
-            // Test: Get revenue without date filter first
-            branchRevenue = await db.getBranchRevenue(branchId, null, null);
-            console.log('✅ Branch Revenue (no date filter):', branchRevenue);
-        } catch (branchError) {
-            console.error('❌ Error getting branch revenue:', branchError);
-            throw branchError;
-        }
-        
-        try {
-            machineRevenue = await db.getRevenue(branchId, null, null, null);
-            console.log('✅ Machine Revenue (no date filter):', machineRevenue);
-        } catch (machineError) {
-            console.error('❌ Error getting machine revenue:', machineError);
-            throw machineError;
-        }
-        
-        try {
-            // Also get with date filter for comparison
-            const branchRevenueFiltered = await db.getBranchRevenue(branchId, start_date, end_date);
-            const machineRevenueFiltered = await db.getRevenue(branchId, null, start_date, end_date);
-            
-            console.log('✅ Branch Revenue (with date filter):', branchRevenueFiltered);
-            console.log('✅ Machine Revenue (with date filter):', machineRevenueFiltered);
-        } catch (dateFilterError) {
-            console.error('❌ Error getting revenue with date filter:', dateFilterError);
-        }
+        const machineRevenue = [
+            {
+                branch_name: 'Chi Nhánh Quận 1',
+                machine_name: 'Máy Game 001',
+                total_revenue: 100,
+                total_coins_in: 50,
+                total_coins_out: 25
+            }
+        ];
         
         const totalRevenue = branchRevenue.reduce((sum, branch) => sum + (branch.total_revenue || 0), 0);
         const totalCoinsIn = branchRevenue.reduce((sum, branch) => sum + (branch.total_coins_in || 0), 0);
