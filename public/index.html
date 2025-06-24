@@ -2,8 +2,23 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Máy Chơi Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Game Manager - Quản Lý Máy Chơi Game</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Game Manager">
+    
+    <!-- Favicons và Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon-192x192.svg">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg">
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.svg">
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.svg">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
     <style>
         * {
             margin: 0;
@@ -332,6 +347,49 @@
             margin-bottom: 30px;
         }
 
+        /* Mobile responsive cho stats-grid */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .stat-card {
+                padding: 15px;
+                min-height: 80px;
+            }
+            
+            .stat-card h3 {
+                font-size: 1.2rem;
+                margin-bottom: 5px;
+            }
+            
+            .stat-card p {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+                min-height: 70px;
+            }
+            
+            .stat-card h3 {
+                font-size: 1rem;
+            }
+            
+            .stat-card p {
+                font-size: 0.8rem;
+            }
+        }
+
         .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -422,16 +480,74 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 15px 0;
+            }
+            
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+            
             .tabs {
-                flex-direction: column;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            .tab {
+                flex: 1;
+                min-width: 80px;
+                padding: 10px 8px;
+                font-size: 0.9rem;
             }
             
             .filters {
                 flex-direction: column;
+                gap: 10px;
+            }
+            
+            .form-group {
+                width: 100%;
+            }
+            
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px; /* Ngăn zoom trên iOS */
+                border-radius: 8px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+                margin-top: 10px;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .machine-item {
+                padding: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .transaction-item {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            /* Touch-friendly buttons */
+            .tab,
+            .btn,
+            button {
+                min-height: 44px;
+                -webkit-tap-highlight-color: transparent;
             }
         }
     </style>
@@ -1713,4 +1829,4 @@
         }
     </script>
 </body>
-</html> <-zsh Force rebuild Mon Jun 23 20:18:16 +07 2025 -->
+</html> 
