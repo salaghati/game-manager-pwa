@@ -390,64 +390,112 @@ class Database {
 
     // Lấy doanh thu theo chi nhánh, máy và thời gian
     async getRevenue(branchId = null, machineId = null, startDate = null, endDate = null) {
-        let query = `
-            SELECT 
-                b.name as branch_name,
-                m.name as machine_name,
-                m.location,
-                m.branch_id,
-                COALESCE(SUM(t.coins_in), 0) as total_coins_in,
-                COALESCE(SUM(t.coins_out), 0) as total_coins_out,
-                COALESCE(SUM(t.revenue), 0) as total_revenue,
-                COUNT(t.id) as transaction_count
-            FROM machines m
-            LEFT JOIN transactions t ON m.id = t.machine_id
-            JOIN branches b ON m.branch_id = b.id
-        `;
+        let query, params = [], whereConditions = [], paramIndex = 1;
         
-        const params = [];
-        let whereConditions = [];
-        let paramIndex = 1;
-
-        if (branchId) {
-            whereConditions.push(`m.branch_id = $${paramIndex}`);
-            params.push(branchId);
-            paramIndex++;
-        }
-
-        if (machineId) {
-            whereConditions.push(`m.id = $${paramIndex}`);
-            params.push(machineId);
-            paramIndex++;
-        }
-
-        if (startDate) {
-            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
-            params.push(startDate);
-            paramIndex++;
-        }
-
-        if (endDate) {
-            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
-            params.push(endDate);
-            paramIndex++;
-        }
-
-        if (whereConditions.length > 0) {
-            query += " WHERE " + whereConditions.join(" AND ");
-        }
-
-        query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
-
         if (this.isPostgres) {
-            const result = await this.pool.query(query, params);
-            return result.rows;
+            query = `
+                SELECT 
+                    b.name as branch_name,
+                    m.name as machine_name,
+                    m.location,
+                    m.branch_id,
+                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
+                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                    COALESCE(SUM(t.revenue), 0) as total_revenue,
+                    COUNT(t.id) as transaction_count
+                FROM machines m
+                LEFT JOIN transactions t ON m.id = t.machine_id
+                JOIN branches b ON m.branch_id = b.id
+            `;
+            
+            if (branchId) {
+                whereConditions.push(`m.branch_id = $${paramIndex}`);
+                params.push(branchId);
+                paramIndex++;
+            }
+
+            if (machineId) {
+                whereConditions.push(`m.id = $${paramIndex}`);
+                params.push(machineId);
+                paramIndex++;
+            }
+
+            if (startDate) {
+                whereConditions.push(`t.transaction_date::date >= $${paramIndex}::date`);
+                params.push(startDate);
+                paramIndex++;
+            }
+
+            if (endDate) {
+                whereConditions.push(`t.transaction_date::date <= $${paramIndex}::date`);
+                params.push(endDate);
+                paramIndex++;
+            }
+
+            if (whereConditions.length > 0) {
+                query += " WHERE " + whereConditions.join(" AND ");
+            }
+
+            query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
+
+            try {
+                const result = await this.pool.query(query, params);
+                return result.rows;
+            } catch (error) {
+                console.error('Error in getRevenue (PostgreSQL):', error);
+                throw error;
+            }
         } else {
-            const sqliteQuery = query.replace(/\$(\d+)/g, '?');
+            // SQLite version
+            query = `
+                SELECT 
+                    b.name as branch_name,
+                    m.name as machine_name,
+                    m.location,
+                    m.branch_id,
+                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
+                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                    COALESCE(SUM(t.revenue), 0) as total_revenue,
+                    COUNT(t.id) as transaction_count
+                FROM machines m
+                LEFT JOIN transactions t ON m.id = t.machine_id
+                JOIN branches b ON m.branch_id = b.id
+            `;
+            
+            if (branchId) {
+                whereConditions.push("m.branch_id = ?");
+                params.push(branchId);
+            }
+
+            if (machineId) {
+                whereConditions.push("m.id = ?");
+                params.push(machineId);
+            }
+
+            if (startDate) {
+                whereConditions.push("DATE(t.transaction_date) >= DATE(?)");
+                params.push(startDate);
+            }
+
+            if (endDate) {
+                whereConditions.push("DATE(t.transaction_date) <= DATE(?)");
+                params.push(endDate);
+            }
+
+            if (whereConditions.length > 0) {
+                query += " WHERE " + whereConditions.join(" AND ");
+            }
+
+            query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
+
             return new Promise((resolve, reject) => {
-                this.db.all(sqliteQuery, params, (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
+                this.db.all(query, params, (err, rows) => {
+                    if (err) {
+                        console.error('Error in getRevenue (SQLite):', err);
+                        reject(err);
+                    } else {
+                        resolve(rows);
+                    }
                 });
             });
         }
@@ -455,59 +503,103 @@ class Database {
 
     // Lấy tổng doanh thu theo chi nhánh
     async getBranchRevenue(branchId = null, startDate = null, endDate = null) {
-        let query = `
-            SELECT 
-                b.id as branch_id,
-                b.name as branch_name,
-                b.address,
-                b.manager_name,
-                COALESCE(SUM(t.coins_in), 0) as total_coins_in,
-                COALESCE(SUM(t.coins_out), 0) as total_coins_out,
-                COALESCE(SUM(t.revenue), 0) as total_revenue,
-                COUNT(DISTINCT m.id) as machine_count,
-                COUNT(t.id) as transaction_count
-            FROM branches b
-            LEFT JOIN machines m ON b.id = m.branch_id
-            LEFT JOIN transactions t ON m.id = t.machine_id
-        `;
+        let query, params = [], whereConditions = [], paramIndex = 1;
         
-        const params = [];
-        let whereConditions = [];
-        let paramIndex = 1;
-
-        if (branchId) {
-            whereConditions.push(`b.id = $${paramIndex}`);
-            params.push(branchId);
-            paramIndex++;
-        }
-
-        if (startDate) {
-            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
-            params.push(startDate);
-            paramIndex++;
-        }
-
-        if (endDate) {
-            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
-            params.push(endDate);
-            paramIndex++;
-        }
-
-        if (whereConditions.length > 0) {
-            query += " WHERE " + whereConditions.join(" AND ");
-        }
-
-        query += " GROUP BY b.id ORDER BY b.id";
-
         if (this.isPostgres) {
-            const result = await this.pool.query(query, params);
-            return result.rows;
+            query = `
+                SELECT 
+                    b.id as branch_id,
+                    b.name as branch_name,
+                    b.address,
+                    b.manager_name,
+                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
+                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                    COALESCE(SUM(t.revenue), 0) as total_revenue,
+                    COUNT(DISTINCT m.id) as machine_count,
+                    COUNT(t.id) as transaction_count
+                FROM branches b
+                LEFT JOIN machines m ON b.id = m.branch_id
+                LEFT JOIN transactions t ON m.id = t.machine_id
+            `;
+            
+            if (branchId) {
+                whereConditions.push(`b.id = $${paramIndex}`);
+                params.push(branchId);
+                paramIndex++;
+            }
+
+            if (startDate) {
+                whereConditions.push(`t.transaction_date::date >= $${paramIndex}::date`);
+                params.push(startDate);
+                paramIndex++;
+            }
+
+            if (endDate) {
+                whereConditions.push(`t.transaction_date::date <= $${paramIndex}::date`);
+                params.push(endDate);
+                paramIndex++;
+            }
+
+            if (whereConditions.length > 0) {
+                query += " WHERE " + whereConditions.join(" AND ");
+            }
+
+            query += " GROUP BY b.id, b.name, b.address, b.manager_name ORDER BY b.id";
+
+            try {
+                const result = await this.pool.query(query, params);
+                return result.rows;
+            } catch (error) {
+                console.error('Error in getBranchRevenue (PostgreSQL):', error);
+                throw error;
+            }
         } else {
-            const sqliteQuery = query.replace(/\$(\d+)/g, '?');
+            // SQLite version
+            query = `
+                SELECT 
+                    b.id as branch_id,
+                    b.name as branch_name,
+                    b.address,
+                    b.manager_name,
+                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
+                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                    COALESCE(SUM(t.revenue), 0) as total_revenue,
+                    COUNT(DISTINCT m.id) as machine_count,
+                    COUNT(t.id) as transaction_count
+                FROM branches b
+                LEFT JOIN machines m ON b.id = m.branch_id
+                LEFT JOIN transactions t ON m.id = t.machine_id
+            `;
+            
+            if (branchId) {
+                whereConditions.push("b.id = ?");
+                params.push(branchId);
+            }
+
+            if (startDate) {
+                whereConditions.push("DATE(t.transaction_date) >= DATE(?)");
+                params.push(startDate);
+            }
+
+            if (endDate) {
+                whereConditions.push("DATE(t.transaction_date) <= DATE(?)");
+                params.push(endDate);
+            }
+
+            if (whereConditions.length > 0) {
+                query += " WHERE " + whereConditions.join(" AND ");
+            }
+
+            query += " GROUP BY b.id ORDER BY b.id";
+
             return new Promise((resolve, reject) => {
-                this.db.all(sqliteQuery, params, (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
+                this.db.all(query, params, (err, rows) => {
+                    if (err) {
+                        console.error('Error in getBranchRevenue (SQLite):', err);
+                        reject(err);
+                    } else {
+                        resolve(rows);
+                    }
                 });
             });
         }
@@ -559,13 +651,13 @@ class Database {
         }
 
         if (startDate) {
-            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
+            whereConditions.push(`t.transaction_date::date >= $${paramIndex}::date`);
             params.push(startDate);
             paramIndex++;
         }
 
         if (endDate) {
-            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
+            whereConditions.push(`t.transaction_date::date <= $${paramIndex}::date`);
             params.push(endDate);
             paramIndex++;
         }
@@ -694,62 +786,107 @@ class Database {
 
     // Lấy summary cho transactions
     async getTransactionSummary(branchId = null, machineId = null, userId = null, startDate = null, endDate = null) {
-        let query = `
-            SELECT 
-                COUNT(*) as total_transactions,
-                COALESCE(SUM(coins_in), 0) as total_coins_in,
-                COALESCE(SUM(coins_out), 0) as total_coins_out,
-                COALESCE(SUM(revenue), 0) as total_revenue
-            FROM transactions t
-        `;
+        let query, params = [], whereConditions = [], paramIndex = 1;
         
-        const params = [];
-        let whereConditions = [];
-        let paramIndex = 1;
-
-        if (branchId) {
-            whereConditions.push(`t.branch_id = $${paramIndex}`);
-            params.push(branchId);
-            paramIndex++;
-        }
-
-        if (machineId) {
-            whereConditions.push(`t.machine_id = $${paramIndex}`);
-            params.push(machineId);
-            paramIndex++;
-        }
-
-        if (userId) {
-            whereConditions.push(`t.user_id = $${paramIndex}`);
-            params.push(userId);
-            paramIndex++;
-        }
-
-        if (startDate) {
-            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
-            params.push(startDate);
-            paramIndex++;
-        }
-
-        if (endDate) {
-            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
-            params.push(endDate);
-            paramIndex++;
-        }
-
-        if (whereConditions.length > 0) {
-            query += " WHERE " + whereConditions.join(" AND ");
-        }
-
         if (this.isPostgres) {
-            const result = await this.pool.query(query, params);
-            return result.rows[0];
+            query = `
+                SELECT 
+                    COUNT(*) as total_transactions,
+                    COALESCE(SUM(coins_in), 0) as total_coins_in,
+                    COALESCE(SUM(coins_out), 0) as total_coins_out,
+                    COALESCE(SUM(revenue), 0) as total_revenue
+                FROM transactions t
+            `;
+            
+            if (branchId) {
+                whereConditions.push(`t.branch_id = $${paramIndex}`);
+                params.push(branchId);
+                paramIndex++;
+            }
+
+            if (machineId) {
+                whereConditions.push(`t.machine_id = $${paramIndex}`);
+                params.push(machineId);
+                paramIndex++;
+            }
+
+            if (userId) {
+                whereConditions.push(`t.user_id = $${paramIndex}`);
+                params.push(userId);
+                paramIndex++;
+            }
+
+            if (startDate) {
+                whereConditions.push(`t.transaction_date::date >= $${paramIndex}::date`);
+                params.push(startDate);
+                paramIndex++;
+            }
+
+            if (endDate) {
+                whereConditions.push(`t.transaction_date::date <= $${paramIndex}::date`);
+                params.push(endDate);
+                paramIndex++;
+            }
+
+            if (whereConditions.length > 0) {
+                query += " WHERE " + whereConditions.join(" AND ");
+            }
+
+            try {
+                const result = await this.pool.query(query, params);
+                return result.rows[0];
+            } catch (error) {
+                console.error('Error in getTransactionSummary (PostgreSQL):', error);
+                throw error;
+            }
         } else {
-            const sqliteQuery = query.replace(/\$(\d+)/g, '?');
+            // SQLite version
+            query = `
+                SELECT 
+                    COUNT(*) as total_transactions,
+                    COALESCE(SUM(coins_in), 0) as total_coins_in,
+                    COALESCE(SUM(coins_out), 0) as total_coins_out,
+                    COALESCE(SUM(revenue), 0) as total_revenue
+                FROM transactions t
+            `;
+            
+            if (branchId) {
+                whereConditions.push("t.branch_id = ?");
+                params.push(branchId);
+            }
+
+            if (machineId) {
+                whereConditions.push("t.machine_id = ?");
+                params.push(machineId);
+            }
+
+            if (userId) {
+                whereConditions.push("t.user_id = ?");
+                params.push(userId);
+            }
+
+            if (startDate) {
+                whereConditions.push("DATE(t.transaction_date) >= DATE(?)");
+                params.push(startDate);
+            }
+
+            if (endDate) {
+                whereConditions.push("DATE(t.transaction_date) <= DATE(?)");
+                params.push(endDate);
+            }
+
+            if (whereConditions.length > 0) {
+                query += " WHERE " + whereConditions.join(" AND ");
+            }
+
             return new Promise((resolve, reject) => {
-                this.db.get(sqliteQuery, params, (err, row) => {
-                    if (err) reject(err);
-                    else resolve(row);
+                this.db.get(query, params, (err, row) => {
+                    if (err) {
+                        console.error('Error in getTransactionSummary (SQLite):', err);
+                        reject(err);
+                    } else {
+                        resolve(row);
+                    }
                 });
             });
         }
