@@ -300,27 +300,44 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
         console.log('Query params:', { branch_id, start_date, end_date });
         console.log('Resolved branchId:', branchId);
         
-        // Debug: Check all transactions for this branch
-        console.log('🔍 Checking all transactions for branch:', branchId);
-        const allTransactions = await db.getTransactions(branchId, null, null, null, null, 'date_desc', 10);
-        console.log('📦 All Transactions (last 10):', allTransactions);
+        let branchRevenue, machineRevenue;
         
-        // Test: Get revenue without date filter first
-        const branchRevenue = await db.getBranchRevenue(branchId, null, null);
-        const machineRevenue = await db.getRevenue(branchId, null, null, null);
+        try {
+            // Debug: Check all transactions for this branch
+            console.log('🔍 Checking all transactions for branch:', branchId);
+            const allTransactions = await db.getTransactions(branchId, null, null, null, null, 'date_desc', 10);
+            console.log('📦 All Transactions (last 10):', allTransactions);
+        } catch (transactionError) {
+            console.error('❌ Error getting transactions:', transactionError);
+        }
         
-        console.log('📦 Branch Revenue (no date filter):', branchRevenue);
-        console.log('📦 Machine Revenue (no date filter):', machineRevenue);
+        try {
+            // Test: Get revenue without date filter first
+            branchRevenue = await db.getBranchRevenue(branchId, null, null);
+            console.log('✅ Branch Revenue (no date filter):', branchRevenue);
+        } catch (branchError) {
+            console.error('❌ Error getting branch revenue:', branchError);
+            throw branchError;
+        }
         
-        // Also get with date filter for comparison
-        const branchRevenueFiltered = await db.getBranchRevenue(branchId, start_date, end_date);
-        const machineRevenueFiltered = await db.getRevenue(branchId, null, start_date, end_date);
+        try {
+            machineRevenue = await db.getRevenue(branchId, null, null, null);
+            console.log('✅ Machine Revenue (no date filter):', machineRevenue);
+        } catch (machineError) {
+            console.error('❌ Error getting machine revenue:', machineError);
+            throw machineError;
+        }
         
-        console.log('📦 Branch Revenue (with date filter):', branchRevenueFiltered);
-        console.log('📦 Machine Revenue (with date filter):', machineRevenueFiltered);
-        
-        console.log('📦 Branch Revenue:', branchRevenue);
-        console.log('📦 Machine Revenue:', machineRevenue);
+        try {
+            // Also get with date filter for comparison
+            const branchRevenueFiltered = await db.getBranchRevenue(branchId, start_date, end_date);
+            const machineRevenueFiltered = await db.getRevenue(branchId, null, start_date, end_date);
+            
+            console.log('✅ Branch Revenue (with date filter):', branchRevenueFiltered);
+            console.log('✅ Machine Revenue (with date filter):', machineRevenueFiltered);
+        } catch (dateFilterError) {
+            console.error('❌ Error getting revenue with date filter:', dateFilterError);
+        }
         
         const totalRevenue = branchRevenue.reduce((sum, branch) => sum + (branch.total_revenue || 0), 0);
         const totalCoinsIn = branchRevenue.reduce((sum, branch) => sum + (branch.total_coins_in || 0), 0);
