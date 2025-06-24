@@ -295,30 +295,52 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
             branchId = parseInt(branch_id);
         }
         
-        console.log('🔍 Dashboard API - Simple Test');
+        console.log('🔍 Dashboard API - Testing Database Calls');
         console.log('User:', user.username, 'Branch:', branchId);
         
-        // Simple hardcoded response first to test if the issue is in database queries
-        const branchRevenue = [
-            {
-                branch_id: branchId || 1,
-                branch_name: 'Chi Nhánh Quận 1',
-                total_revenue: 100,
-                total_coins_in: 50,
-                total_coins_out: 25,
-                machine_count: 2
-            }
-        ];
+        let branchRevenue, machineRevenue;
         
-        const machineRevenue = [
-            {
-                branch_name: 'Chi Nhánh Quận 1',
-                machine_name: 'Máy Game 001',
-                total_revenue: 100,
-                total_coins_in: 50,
-                total_coins_out: 25
-            }
-        ];
+        try {
+            // Try simple database calls without date filters first
+            console.log('📊 Testing getBranchRevenue...');
+            branchRevenue = await db.getBranchRevenue(branchId, null, null);
+            console.log('✅ getBranchRevenue success:', branchRevenue);
+        } catch (error) {
+            console.error('❌ getBranchRevenue failed:', error.message);
+            console.error('Stack:', error.stack);
+            
+            // Fallback to hardcoded data
+            branchRevenue = [
+                {
+                    branch_id: branchId || 1,
+                    branch_name: 'Chi Nhánh Quận 1 (Fallback)',
+                    total_revenue: 0,
+                    total_coins_in: 0,
+                    total_coins_out: 0,
+                    machine_count: 0
+                }
+            ];
+        }
+        
+        try {
+            console.log('🎮 Testing getRevenue...');
+            machineRevenue = await db.getRevenue(branchId, null, null, null);
+            console.log('✅ getRevenue success:', machineRevenue);
+        } catch (error) {
+            console.error('❌ getRevenue failed:', error.message);
+            console.error('Stack:', error.stack);
+            
+            // Fallback to hardcoded data
+            machineRevenue = [
+                {
+                    branch_name: 'Chi Nhánh Quận 1 (Fallback)',
+                    machine_name: 'Máy Game 001 (Fallback)',
+                    total_revenue: 0,
+                    total_coins_in: 0,
+                    total_coins_out: 0
+                }
+            ];
+        }
         
         const totalRevenue = branchRevenue.reduce((sum, branch) => sum + (branch.total_revenue || 0), 0);
         const totalCoinsIn = branchRevenue.reduce((sum, branch) => sum + (branch.total_coins_in || 0), 0);
