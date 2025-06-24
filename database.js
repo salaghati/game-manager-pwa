@@ -388,7 +388,373 @@ class Database {
         }
     }
 
-    // Các methods khác cho revenue, transactions, etc. (simplified để tiết kiệm chỗ)
+    // Lấy doanh thu theo chi nhánh, máy và thời gian
+    async getRevenue(branchId = null, machineId = null, startDate = null, endDate = null) {
+        let query = `
+            SELECT 
+                b.name as branch_name,
+                m.name as machine_name,
+                m.location,
+                m.branch_id,
+                COALESCE(SUM(t.coins_in), 0) as total_coins_in,
+                COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                COALESCE(SUM(t.revenue), 0) as total_revenue,
+                COUNT(t.id) as transaction_count
+            FROM machines m
+            LEFT JOIN transactions t ON m.id = t.machine_id
+            JOIN branches b ON m.branch_id = b.id
+        `;
+        
+        const params = [];
+        let whereConditions = [];
+        let paramIndex = 1;
+
+        if (branchId) {
+            whereConditions.push(`m.branch_id = $${paramIndex}`);
+            params.push(branchId);
+            paramIndex++;
+        }
+
+        if (machineId) {
+            whereConditions.push(`m.id = $${paramIndex}`);
+            params.push(machineId);
+            paramIndex++;
+        }
+
+        if (startDate) {
+            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
+            params.push(startDate);
+            paramIndex++;
+        }
+
+        if (endDate) {
+            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
+            params.push(endDate);
+            paramIndex++;
+        }
+
+        if (whereConditions.length > 0) {
+            query += " WHERE " + whereConditions.join(" AND ");
+        }
+
+        query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
+
+        if (this.isPostgres) {
+            const result = await this.pool.query(query, params);
+            return result.rows;
+        } else {
+            const sqliteQuery = query.replace(/\$(\d+)/g, '?');
+            return new Promise((resolve, reject) => {
+                this.db.all(sqliteQuery, params, (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows);
+                });
+            });
+        }
+    }
+
+    // Lấy tổng doanh thu theo chi nhánh
+    async getBranchRevenue(branchId = null, startDate = null, endDate = null) {
+        let query = `
+            SELECT 
+                b.id as branch_id,
+                b.name as branch_name,
+                b.address,
+                b.manager_name,
+                COALESCE(SUM(t.coins_in), 0) as total_coins_in,
+                COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                COALESCE(SUM(t.revenue), 0) as total_revenue,
+                COUNT(DISTINCT m.id) as machine_count,
+                COUNT(t.id) as transaction_count
+            FROM branches b
+            LEFT JOIN machines m ON b.id = m.branch_id
+            LEFT JOIN transactions t ON m.id = t.machine_id
+        `;
+        
+        const params = [];
+        let whereConditions = [];
+        let paramIndex = 1;
+
+        if (branchId) {
+            whereConditions.push(`b.id = $${paramIndex}`);
+            params.push(branchId);
+            paramIndex++;
+        }
+
+        if (startDate) {
+            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
+            params.push(startDate);
+            paramIndex++;
+        }
+
+        if (endDate) {
+            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
+            params.push(endDate);
+            paramIndex++;
+        }
+
+        if (whereConditions.length > 0) {
+            query += " WHERE " + whereConditions.join(" AND ");
+        }
+
+        query += " GROUP BY b.id ORDER BY b.id";
+
+        if (this.isPostgres) {
+            const result = await this.pool.query(query, params);
+            return result.rows;
+        } else {
+            const sqliteQuery = query.replace(/\$(\d+)/g, '?');
+            return new Promise((resolve, reject) => {
+                this.db.all(sqliteQuery, params, (err, rows) => {
+                    if (err) reject(err);
+                    else resolve(rows);
+                });
+            });
+        }
+    }
+
+    // Lấy lịch sử giao dịch với filter nâng cao
+    getTransactions(branchId = null, machineId = null, userId = null, startDate = null, endDate = null, sortBy = 'date_desc', limit = 50) {
+        if (this.isPostgres) {
+            return this.getTransactionsPostgres(branchId, machineId, userId, startDate, endDate, sortBy, limit);
+        } else {
+            return this.getTransactionsSQLite(branchId, machineId, userId, startDate, endDate, sortBy, limit);
+        }
+    }
+
+    async getTransactionsPostgres(branchId = null, machineId = null, userId = null, startDate = null, endDate = null, sortBy = 'date_desc', limit = 50) {
+        let query = `
+            SELECT 
+                t.*,
+                m.name as machine_name,
+                m.location,
+                b.name as branch_name,
+                u.full_name as user_name
+            FROM transactions t
+            JOIN machines m ON t.machine_id = m.id
+            JOIN branches b ON t.branch_id = b.id
+            LEFT JOIN users u ON t.user_id = u.id
+        `;
+        
+        const params = [];
+        let whereConditions = [];
+        let paramIndex = 1;
+        
+        if (branchId) {
+            whereConditions.push(`t.branch_id = $${paramIndex}`);
+            params.push(branchId);
+            paramIndex++;
+        }
+        
+        if (machineId) {
+            whereConditions.push(`t.machine_id = $${paramIndex}`);
+            params.push(machineId);
+            paramIndex++;
+        }
+
+        if (userId) {
+            whereConditions.push(`t.user_id = $${paramIndex}`);
+            params.push(userId);
+            paramIndex++;
+        }
+
+        if (startDate) {
+            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
+            params.push(startDate);
+            paramIndex++;
+        }
+
+        if (endDate) {
+            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
+            params.push(endDate);
+            paramIndex++;
+        }
+
+        if (whereConditions.length > 0) {
+            query += " WHERE " + whereConditions.join(" AND ");
+        }
+        
+        // Sorting
+        switch(sortBy) {
+            case 'date_asc':
+                query += " ORDER BY t.transaction_date ASC, t.created_at ASC";
+                break;
+            case 'revenue_desc':
+                query += " ORDER BY t.revenue DESC, t.created_at DESC";
+                break;
+            case 'revenue_asc':
+                query += " ORDER BY t.revenue ASC, t.created_at DESC";
+                break;
+            default: // date_desc
+                query += " ORDER BY t.transaction_date DESC, t.created_at DESC";
+        }
+
+        query += ` LIMIT $${paramIndex}`;
+        params.push(limit);
+
+        try {
+            const result = await this.pool.query(query, params);
+            const summary = await this.getTransactionSummary(branchId, machineId, userId, startDate, endDate);
+            return {
+                transactions: result.rows,
+                summary: summary
+            };
+        } catch (error) {
+            console.error('Error getting transactions:', error);
+            return { transactions: [], summary: {} };
+        }
+    }
+
+    getTransactionsSQLite(branchId = null, machineId = null, userId = null, startDate = null, endDate = null, sortBy = 'date_desc', limit = 50) {
+        return new Promise((resolve, reject) => {
+            let query = `
+                SELECT 
+                    t.*,
+                    m.name as machine_name,
+                    m.location,
+                    b.name as branch_name,
+                    u.full_name as user_name
+                FROM transactions t
+                JOIN machines m ON t.machine_id = m.id
+                JOIN branches b ON t.branch_id = b.id
+                LEFT JOIN users u ON t.user_id = u.id
+            `;
+            
+            const params = [];
+            let whereConditions = [];
+            
+            if (branchId) {
+                whereConditions.push("t.branch_id = ?");
+                params.push(branchId);
+            }
+            
+            if (machineId) {
+                whereConditions.push("t.machine_id = ?");
+                params.push(machineId);
+            }
+
+            if (userId) {
+                whereConditions.push("t.user_id = ?");
+                params.push(userId);
+            }
+
+            if (startDate) {
+                whereConditions.push("DATE(t.transaction_date) >= DATE(?)");
+                params.push(startDate);
+            }
+
+            if (endDate) {
+                whereConditions.push("DATE(t.transaction_date) <= DATE(?)");
+                params.push(endDate);
+            }
+
+            if (whereConditions.length > 0) {
+                query += " WHERE " + whereConditions.join(" AND ");
+            }
+            
+            // Sorting
+            switch(sortBy) {
+                case 'date_asc':
+                    query += " ORDER BY t.transaction_date ASC, t.created_at ASC";
+                    break;
+                case 'revenue_desc':
+                    query += " ORDER BY t.revenue DESC, t.created_at DESC";
+                    break;
+                case 'revenue_asc':
+                    query += " ORDER BY t.revenue ASC, t.created_at DESC";
+                    break;
+                default: // date_desc
+                    query += " ORDER BY t.transaction_date DESC, t.created_at DESC";
+            }
+
+            query += " LIMIT ?";
+            params.push(limit);
+
+            this.db.all(query, params, (err, rows) => {
+                if (err) reject(err);
+                else {
+                    // Cũng tính summary
+                    this.getTransactionSummary(branchId, machineId, userId, startDate, endDate)
+                        .then(summary => {
+                            resolve({
+                                transactions: rows,
+                                summary: summary
+                            });
+                        })
+                        .catch(() => {
+                            resolve({
+                                transactions: rows,
+                                summary: {}
+                            });
+                        });
+                }
+            });
+        });
+    }
+
+    // Lấy summary cho transactions
+    async getTransactionSummary(branchId = null, machineId = null, userId = null, startDate = null, endDate = null) {
+        let query = `
+            SELECT 
+                COUNT(*) as total_transactions,
+                COALESCE(SUM(coins_in), 0) as total_coins_in,
+                COALESCE(SUM(coins_out), 0) as total_coins_out,
+                COALESCE(SUM(revenue), 0) as total_revenue
+            FROM transactions t
+        `;
+        
+        const params = [];
+        let whereConditions = [];
+        let paramIndex = 1;
+
+        if (branchId) {
+            whereConditions.push(`t.branch_id = $${paramIndex}`);
+            params.push(branchId);
+            paramIndex++;
+        }
+
+        if (machineId) {
+            whereConditions.push(`t.machine_id = $${paramIndex}`);
+            params.push(machineId);
+            paramIndex++;
+        }
+
+        if (userId) {
+            whereConditions.push(`t.user_id = $${paramIndex}`);
+            params.push(userId);
+            paramIndex++;
+        }
+
+        if (startDate) {
+            whereConditions.push(`DATE(t.transaction_date) >= DATE($${paramIndex})`);
+            params.push(startDate);
+            paramIndex++;
+        }
+
+        if (endDate) {
+            whereConditions.push(`DATE(t.transaction_date) <= DATE($${paramIndex})`);
+            params.push(endDate);
+            paramIndex++;
+        }
+
+        if (whereConditions.length > 0) {
+            query += " WHERE " + whereConditions.join(" AND ");
+        }
+
+        if (this.isPostgres) {
+            const result = await this.pool.query(query, params);
+            return result.rows[0];
+        } else {
+            const sqliteQuery = query.replace(/\$(\d+)/g, '?');
+            return new Promise((resolve, reject) => {
+                this.db.get(sqliteQuery, params, (err, row) => {
+                    if (err) reject(err);
+                    else resolve(row);
+                });
+            });
+        }
+    }
+
     close() {
         if (this.isPostgres) {
             this.pool.end();
