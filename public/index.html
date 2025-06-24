@@ -1098,14 +1098,14 @@
         // Set ngày mặc định (hôm nay)
         function setDefaultDates() {
             const today = new Date().toISOString().split('T')[0];
-            const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
             
             document.getElementById('start_date').value = today;
             document.getElementById('end_date').value = today;
             document.getElementById('transaction_date').value = today;
             
-            // Set default cho history filters
-            document.getElementById('history_start_date').value = sevenDaysAgo;
+            // Set default cho history filters - mở rộng thành 30 ngày
+            document.getElementById('history_start_date').value = thirtyDaysAgo;
             document.getElementById('history_end_date').value = today;
         }
 
@@ -1287,6 +1287,12 @@
                     showAlert(`✅ ${result.message}. Doanh thu: ${result.data.revenue} xu`);
                     document.getElementById('transactionForm').reset();
                     loadDashboard(); // Refresh dashboard
+                    
+                    // Refresh history nếu user đang ở tab history
+                    const currentTab = document.querySelector('.tab.active');
+                    if (currentTab && currentTab.textContent.includes('Lịch Sử')) {
+                        loadTransactions();
+                    }
                 } else {
                     showAlert(result.error, 'error');
                 }
@@ -1590,6 +1596,11 @@
                 const sortBy = document.getElementById('sort_by').value;
                 const lateEntryFilter = document.getElementById('filter_late_entry')?.value;
                 
+                // Debug current user and filter params
+                console.log('🔍 loadTransactions DEBUG:');
+                console.log('Current User:', currentUser);
+                console.log('Filter params:', { machineId, branchId, userId, startDate, endDate, sortBy });
+                
                 const url = new URL(`${window.location.origin}/api/transactions`);
                 if (machineId) url.searchParams.append('machine_id', machineId);
                 if (branchId) url.searchParams.append('branch_id', branchId);
@@ -1599,10 +1610,14 @@
                 if (sortBy) url.searchParams.append('sort_by', sortBy);
                 url.searchParams.append('limit', '50');
 
+                console.log('🌐 API URL:', url.toString());
+
                 const response = await fetch(url, {
                     credentials: 'include'
                 });
                 const data = await response.json();
+                
+                console.log('📦 API Response:', data);
                 
                 // Hiển thị summary
                 displayHistorySummary(data.summary || {});
