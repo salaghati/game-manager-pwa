@@ -300,8 +300,24 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
         console.log('Query params:', { branch_id, start_date, end_date });
         console.log('Resolved branchId:', branchId);
         
-        const branchRevenue = await db.getBranchRevenue(branchId, start_date, end_date);
-        const machineRevenue = await db.getRevenue(branchId, null, start_date, end_date);
+        // Debug: Check all transactions for this branch
+        console.log('🔍 Checking all transactions for branch:', branchId);
+        const allTransactions = await db.getTransactions(branchId, null, null, null, null, 'date_desc', 10);
+        console.log('📦 All Transactions (last 10):', allTransactions);
+        
+        // Test: Get revenue without date filter first
+        const branchRevenue = await db.getBranchRevenue(branchId, null, null);
+        const machineRevenue = await db.getRevenue(branchId, null, null, null);
+        
+        console.log('📦 Branch Revenue (no date filter):', branchRevenue);
+        console.log('📦 Machine Revenue (no date filter):', machineRevenue);
+        
+        // Also get with date filter for comparison
+        const branchRevenueFiltered = await db.getBranchRevenue(branchId, start_date, end_date);
+        const machineRevenueFiltered = await db.getRevenue(branchId, null, start_date, end_date);
+        
+        console.log('📦 Branch Revenue (with date filter):', branchRevenueFiltered);
+        console.log('📦 Machine Revenue (with date filter):', machineRevenueFiltered);
         
         console.log('📦 Branch Revenue:', branchRevenue);
         console.log('📦 Machine Revenue:', machineRevenue);
