@@ -1246,12 +1246,29 @@
         document.getElementById('transactionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Validation ngày
+            const selectedDate = document.getElementById('transaction_date').value;
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (selectedDate > today) {
+                showAlert('❌ Không thể nhập giao dịch cho ngày tương lai! Chỉ được nhập từ hôm nay trở về trước.', 'error');
+                return;
+            }
+            
+            // Cảnh báo nếu nhập muộn (ngày quá khứ)
+            if (selectedDate < today) {
+                const confirmLate = confirm(`⚠️ CẢNH BÁO: Bạn đang nhập giao dịch cho ngày ${selectedDate} (quá khứ).\n\nĐây sẽ được đánh dấu là "NHẬP MUỘN".\n\nBạn có chắc chắn muốn tiếp tục?`);
+                if (!confirmLate) {
+                    return;
+                }
+            }
+            
             const formData = {
                 machine_id: parseInt(document.getElementById('machine_id').value),
                 coins_in: parseInt(document.getElementById('coins_in').value) || 0,
                 coins_out: parseInt(document.getElementById('coins_out').value) || 0,
                 note: document.getElementById('note').value,
-                transaction_date: document.getElementById('transaction_date').value
+                transaction_date: selectedDate
             };
 
             try {
@@ -1403,9 +1420,9 @@
                     const lateUsers = {};
                     
                                          transactions.forEach(transaction => {
-                         // Nhập muộn = ngày nhập liệu > ngày giao dịch
-                         const createdDateStr = transaction.created_at.split(' ')[0]; // yyyy-mm-dd từ "yyyy-mm-dd hh:mm:ss"
-                         const isLate = new Date(createdDateStr) > new Date(transaction.transaction_date);
+                         // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
+                         const today = new Date().toISOString().split('T')[0];
+                         const isLate = transaction.transaction_date < today;
                          if (isLate) {
                              lateCount++;
                              if (transaction.user_name) {
@@ -1463,9 +1480,9 @@
                                     });
                                     const inputDate = createdTime.toLocaleDateString('vi-VN');
                                     const transactionDate = new Date(transaction.transaction_date).toLocaleDateString('vi-VN');
-                                                                         // Nhập muộn = ngày nhập liệu > ngày giao dịch
-                                     const createdDateStr = transaction.created_at.split(' ')[0]; // yyyy-mm-dd từ "yyyy-mm-dd hh:mm:ss"
-                                     const isLate = new Date(createdDateStr) > new Date(transaction.transaction_date);
+                                                                         // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
+                                     const today = new Date().toISOString().split('T')[0];
+                                     const isLate = transaction.transaction_date < today;
                                     
                                     return `
                                         <div style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid ${transaction.revenue >= 0 ? '#28a745' : '#dc3545'};">
@@ -1600,9 +1617,9 @@
                 // Filter theo late entry nếu cần
                 if (lateEntryFilter) {
                     transactions = transactions.filter(transaction => {
-                        // Nhập muộn = ngày nhập liệu > ngày giao dịch
-                        const createdDateStr = transaction.created_at.split(' ')[0]; // yyyy-mm-dd từ "yyyy-mm-dd hh:mm:ss"
-                        const isLate = new Date(createdDateStr) > new Date(transaction.transaction_date);
+                        // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
+                        const today = new Date().toISOString().split('T')[0];
+                        const isLate = transaction.transaction_date < today;
                         if (lateEntryFilter === 'late') return isLate;
                         if (lateEntryFilter === 'ontime') return !isLate;
                         return true;
@@ -1640,10 +1657,10 @@
                             const transactionDate = new Date(transaction.transaction_date).toLocaleDateString('vi-VN');
                             
                             // Kiểm tra xem có nhập muộn không
-                            // Nhập muộn = ngày nhập liệu > ngày giao dịch
-                            const createdDateStr = transaction.created_at.split(' ')[0]; // Lấy yyyy-mm-dd từ "yyyy-mm-dd hh:mm:ss"
+                            // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
+                            const today = new Date().toISOString().split('T')[0];
                             const transactionDateStr = transaction.transaction_date; // Đã là yyyy-mm-dd
-                            const isLateEntry = new Date(createdDateStr) > new Date(transactionDateStr);
+                            const isLateEntry = transactionDateStr < today;
                             
                             console.log(`📅 Transaction Date: ${transactionDateStr}`);
                             console.log(`⏰ Created At: ${transaction.created_at}`);
@@ -1736,9 +1753,9 @@
             const lateUsers = {};
             
             transactions.forEach(transaction => {
-                // Nhập muộn = ngày nhập liệu > ngày giao dịch
-                const createdDateStr = transaction.created_at.split(' ')[0]; // yyyy-mm-dd từ "yyyy-mm-dd hh:mm:ss"
-                const isLate = new Date(createdDateStr) > new Date(transaction.transaction_date);
+                // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
+                const today = new Date().toISOString().split('T')[0];
+                const isLate = transaction.transaction_date < today;
                 if (isLate) {
                     lateCount++;
                     if (transaction.user_name) {
@@ -1854,7 +1871,7 @@
 
         // Tạo test data cho manager
         async function createTestData() {
-            if (!confirm('Tạo dữ liệu test? (Sẽ thêm giao dịch nhập muộn - GD hôm qua nhưng nhập hôm nay)')) return;
+            if (!confirm('Tạo dữ liệu test? (Sẽ thêm giao dịch cho ngày hôm qua - được đánh dấu là NHẬP MUỘN)')) return;
             
             try {
                 // Tạo giao dịch của hôm qua nhưng nhập hôm nay = nhập muộn
@@ -1866,9 +1883,8 @@
                     machine_id: 1, // Máy đầu tiên trong chi nhánh
                     coins_in: 8000,
                     coins_out: 6500,
-                    note: `TEST: Giao dịch ngày ${yesterdayStr} nhưng nhập muộn vào hôm nay`,
-                    transaction_date: yesterdayStr // Giao dịch hôm qua
-                    // created_at sẽ là hôm nay khi gửi request => nhập muộn
+                    note: `TEST: Giao dịch ngày ${yesterdayStr} - đánh dấu nhập muộn`,
+                    transaction_date: yesterdayStr // Giao dịch hôm qua = nhập muộn theo logic mới
                 };
 
                 const response = await fetch(`${API_BASE}/api/transactions`, {
