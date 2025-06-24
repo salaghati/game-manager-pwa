@@ -372,8 +372,8 @@
 
         @media (max-width: 480px) {
             .stats-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px !important;
             }
             
             .stat-card {
@@ -387,6 +387,38 @@
             
             .stat-card p {
                 font-size: 0.8rem;
+            }
+        }
+
+        /* Đặc biệt cho iPhone và thiết bị di động */
+        @media screen and (max-width: 767px) {
+            .stats-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-rows: auto auto !important;
+                gap: 15px !important;
+                width: 100% !important;
+                margin-bottom: 20px !important;
+            }
+            
+            .stat-card {
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                min-height: 100px !important;
+                max-width: none !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            
+            .stat-card h3 {
+                font-size: 1.5rem !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .stat-card p {
+                font-size: 0.9rem !important;
             }
         }
 
@@ -529,7 +561,8 @@
             }
             
             .stats-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
             
             .machine-item {
