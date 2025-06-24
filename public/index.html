@@ -1618,11 +1618,15 @@
                 const data = await response.json();
                 
                 console.log('📦 API Response:', data);
+                console.log('📦 Data type:', typeof data);
+                console.log('📦 Is Array:', Array.isArray(data));
                 
                 // Hiển thị summary
                 displayHistorySummary(data.summary || {});
                 
                 let transactions = data.transactions || data;
+                console.log('📦 Transactions:', transactions);
+                console.log('📦 Transactions length:', transactions?.length);
                 
                 // Thống kê late entry cho manager/admin
                 if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) {
@@ -1679,8 +1683,8 @@
                             
                             console.log(`📅 Transaction Date: ${transactionDateStr}`);
                             console.log(`⏰ Created At: ${transaction.created_at}`);
-                            console.log(`⏰ Created Date: ${createdDateStr}`);
-                            console.log(`🔍 Is Late Entry: ${isLateEntry} (${createdDateStr} > ${transactionDateStr}?)`);
+                            console.log(`⏰ Input Date: ${inputDate}`);
+                            console.log(`🔍 Is Late Entry: ${isLateEntry} (transaction_date < today)`);
                             
                             historyHtml += `
                                 <div class="transaction-item">
