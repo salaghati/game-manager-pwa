@@ -1,13 +1,48 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
+// Try to import pg with error handling
+let Pool;
+try {
+    Pool = require('pg').Pool;
+    console.log('✅ pg package loaded successfully');
+} catch (error) {
+    console.log('❌ pg package not found:', error.message);
+}
+
 class Database {
     constructor() {
-        this.db = new sqlite3.Database('game_machine.db');
-        this.init();
+        console.log('🔍 Initializing Database...');
+        console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL ? 'Present' : 'Not found');
+        
+        // Kiểm tra nếu có DATABASE_URL (PostgreSQL) thì dùng PostgreSQL, không thì dùng SQLite
+        if (process.env.DATABASE_URL && Pool) {
+            console.log('🐘 Connecting to PostgreSQL...');
+            this.isPostgres = true;
+            try {
+                this.pool = new Pool({
+                    connectionString: process.env.DATABASE_URL,
+                    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+                });
+                this.initPostgres();
+            } catch (error) {
+                console.error('❌ PostgreSQL connection failed:', error);
+                console.log('🔄 Falling back to SQLite...');
+                this.fallbackToSQLite();
+            }
+        } else {
+            console.log('🗄️ Using SQLite database...');
+            this.fallbackToSQLite();
+        }
     }
 
-    init() {
+    fallbackToSQLite() {
+        this.isPostgres = false;
+        this.db = new sqlite3.Database('game_machine.db');
+        this.initSQLite();
+    }
+
+    initSQLite() {
         // Tạo bảng branches (chi nhánh)
         this.db.run(`
             CREATE TABLE IF NOT EXISTS branches (
@@ -70,6 +105,115 @@ class Database {
         setTimeout(() => {
             this.initSampleData();
         }, 100);
+    }
+
+    // Khởi tạo PostgreSQL
+    async initPostgres() {
+        try {
+            console.log('🔧 Creating PostgreSQL tables...');
+            
+            // Tạo bảng branches
+            await this.pool.query(`
+                CREATE TABLE IF NOT EXISTS branches (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    address TEXT,
+                    phone TEXT,
+                    manager_name TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Tạo bảng users
+            await this.pool.query(`
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    full_name TEXT NOT NULL,
+                    role TEXT CHECK(role IN ('admin', 'manager', 'employee')) NOT NULL,
+                    branch_id INTEGER REFERENCES branches(id),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Tạo bảng machines
+            await this.pool.query(`
+                CREATE TABLE IF NOT EXISTS machines (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    location TEXT,
+                    branch_id INTEGER NOT NULL REFERENCES branches(id),
+                    status TEXT DEFAULT 'active' CHECK(status IN ('active', 'maintenance', 'inactive')),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Tạo bảng transactions
+            await this.pool.query(`
+                CREATE TABLE IF NOT EXISTS transactions (
+                    id SERIAL PRIMARY KEY,
+                    machine_id INTEGER REFERENCES machines(id),
+                    branch_id INTEGER REFERENCES branches(id),
+                    user_id INTEGER REFERENCES users(id),
+                    coins_in INTEGER DEFAULT 0,
+                    coins_out INTEGER DEFAULT 0,
+                    revenue INTEGER DEFAULT 0,
+                    note TEXT,
+                    transaction_date DATE DEFAULT CURRENT_DATE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            console.log('✅ PostgreSQL tables created successfully');
+            
+            // Khởi tạo dữ liệu mẫu
+            setTimeout(() => {
+                this.initSampleDataPostgres();
+            }, 100);
+
+        } catch (error) {
+            console.error('❌ Error creating PostgreSQL tables:', error);
+            throw error;
+        }
+    }
+
+    // Khởi tạo dữ liệu mẫu cho PostgreSQL
+    async initSampleDataPostgres() {
+        try {
+            const result = await this.pool.query("SELECT COUNT(*) as count FROM branches");
+            
+            if (result.rows[0].count == 0) {
+                console.log('🏢 Khởi tạo dữ liệu mẫu PostgreSQL...');
+                
+                // Thêm chi nhánh
+                await this.pool.query(`INSERT INTO branches (name, address, phone, manager_name) VALUES 
+                    ('Chi Nhánh Quận 1', '123 Nguyễn Huệ, Q.1, TP.HCM', '028-1234-5678', 'Nguyễn Văn A'),
+                    ('Chi Nhánh Quận 3', '456 Võ Văn Tần, Q.3, TP.HCM', '028-2345-6789', 'Trần Thị B')`);
+                
+                // Thêm users
+                await this.pool.query(`INSERT INTO users (username, password, full_name, role, branch_id) VALUES 
+                    ('admin', '123456', 'Quản Trị Viên', 'admin', NULL),
+                    ('manager1', '123456', 'Nguyễn Văn A', 'manager', 1),
+                    ('manager2', '123456', 'Trần Thị B', 'manager', 2),
+                    ('nv001', '123456', 'Lê Văn C', 'employee', 1),
+                    ('nv002', '123456', 'Phạm Thị D', 'employee', 2)`);
+                
+                // Thêm máy
+                await this.pool.query(`INSERT INTO machines (name, location, branch_id) VALUES 
+                    ('Máy Game 001 (Serial: 65543001)', 'Tầng 1 - Khu A', 1),
+                    ('Máy Game 002 (Serial: 65543002)', 'Tầng 1 - Khu B', 1),
+                    ('Máy Game 003 (Serial: 65543003)', 'Tầng 2 - Khu A', 1),
+                    ('Máy Game 101 (Serial: 65543017)', 'Tầng 1 - Khu A', 2),
+                    ('Máy Game 102 (Serial: 65543018)', 'Tầng 1 - Khu B', 2)`);
+                
+                console.log('✅ Dữ liệu mẫu PostgreSQL đã được khởi tạo!');
+            } else {
+                console.log('📊 Dữ liệu PostgreSQL đã tồn tại');
+            }
+        } catch (error) {
+            console.error('❌ Error initializing PostgreSQL sample data:', error);
+        }
     }
 
     initSampleData() {
