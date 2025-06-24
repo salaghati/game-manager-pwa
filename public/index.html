@@ -33,6 +33,59 @@
             padding: 20px;
         }
 
+        /* Mobile layout tối ưu - gọn gàng và ngang */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                overflow-x: hidden;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+            
+            .header {
+                margin-bottom: 10px;
+            }
+            
+            .header-title h1 {
+                font-size: 1.4em !important;
+                margin-bottom: 5px !important;
+            }
+            
+            .header-content {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                gap: 10px !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            .header-user {
+                padding: 8px 12px !important;
+                text-align: right !important;
+                border-radius: 10px !important;
+                min-width: auto !important;
+                width: auto !important;
+            }
+            
+            .header-user h3 {
+                font-size: 0.9em !important;
+                margin-bottom: 2px !important;
+            }
+            
+            .header-user p {
+                font-size: 0.8em !important;
+                margin-bottom: 5px !important;
+            }
+            
+            .btn-logout {
+                padding: 6px 10px !important;
+                font-size: 12px !important;
+            }
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -520,73 +573,113 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 5px;
             }
             
             .header {
-                padding: 15px 0;
+                padding: 8px 0;
             }
             
             .header-title h1 {
-                font-size: 1.5rem;
+                font-size: 1.4rem;
+            }
+            
+            .header-title p {
+                font-size: 0.9rem !important;
+                margin-bottom: 0 !important;
+            }
+            
+            .tab-container {
+                margin-top: 10px;
             }
             
             .tabs {
-                flex-wrap: wrap;
-                gap: 5px;
+                flex-wrap: nowrap;
+                gap: 2px;
             }
             
             .tab {
                 flex: 1;
                 min-width: 80px;
-                padding: 10px 8px;
-                font-size: 0.9rem;
+                padding: 8px 6px;
+                font-size: 0.85rem;
+            }
+            
+            .tab-content {
+                padding: 15px !important;
+                min-height: auto !important;
+            }
+            
+            .tab-content h2 {
+                font-size: 1.2rem !important;
+                margin-bottom: 10px !important;
             }
             
             .filters {
-                flex-direction: column;
-                gap: 10px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+            
+            .filters .form-group {
+                flex: 1;
+                min-width: 150px;
+                margin-bottom: 8px;
             }
             
             .form-group {
                 width: 100%;
+                margin-bottom: 12px;
+            }
+            
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 4px;
             }
             
             .form-group input,
             .form-group select {
                 width: 100%;
-                padding: 12px;
+                padding: 10px;
                 font-size: 16px; /* Ngăn zoom trên iOS */
                 border-radius: 8px;
             }
             
+            .form-group small {
+                font-size: 0.8rem;
+                line-height: 1.2;
+            }
+            
             .btn {
                 width: 100%;
-                padding: 12px;
-                font-size: 1rem;
-                margin-top: 10px;
+                padding: 10px;
+                font-size: 0.95rem;
+                margin-top: 8px;
             }
             
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
+                margin-bottom: 15px;
             }
             
             .machine-item {
-                padding: 15px;
-                margin-bottom: 10px;
+                padding: 12px;
+                margin-bottom: 8px;
             }
             
             .transaction-item {
-                padding: 12px;
+                padding: 10px;
                 font-size: 0.9rem;
+                margin-bottom: 8px;
             }
             
             /* Touch-friendly buttons */
             .tab,
             .btn,
             button {
-                min-height: 44px;
+                min-height: 40px;
                 -webkit-tap-highlight-color: transparent;
             }
         }
