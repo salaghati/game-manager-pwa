@@ -301,9 +301,9 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
         let branchRevenue, machineRevenue;
         
         try {
-            // Try simple database calls without date filters first
-            console.log('📊 Testing getBranchRevenue...');
-            branchRevenue = await db.getBranchRevenue(branchId, null, null);
+            // Use actual date filters from request
+            console.log('📊 Getting branch revenue with date filter...');
+            branchRevenue = await db.getBranchRevenue(branchId, start_date, end_date);
             console.log('✅ getBranchRevenue success:', branchRevenue);
         } catch (error) {
             console.error('❌ getBranchRevenue failed:', error.message);
@@ -323,8 +323,8 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
         }
         
         try {
-            console.log('🎮 Testing getRevenue...');
-            machineRevenue = await db.getRevenue(branchId, null, null, null);
+            console.log('🎮 Getting machine revenue with date filter...');
+            machineRevenue = await db.getRevenue(branchId, null, start_date, end_date);
             console.log('✅ getRevenue success:', machineRevenue);
         } catch (error) {
             console.error('❌ getRevenue failed:', error.message);
