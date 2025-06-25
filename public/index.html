@@ -1582,7 +1582,36 @@
                 }
                 
                 if (!revenueHtml) {
-                    revenueHtml = '<p>Chưa có dữ liệu trong khoảng thời gian này.</p>';
+                    const startDate = document.getElementById('start_date').value;
+                    const endDate = document.getElementById('end_date').value;
+                    const activeQuickFilter = document.querySelector('.quick-filter-btn.active');
+                    let periodName = `${startDate} đến ${endDate}`;
+                    
+                    if (activeQuickFilter) {
+                        const period = activeQuickFilter.dataset.period;
+                        switch(period) {
+                            case 'today': periodName = 'hôm nay'; break;
+                            case 'yesterday': periodName = 'hôm qua'; break;
+                            case 'week': periodName = '7 ngày qua'; break;
+                            case 'month': periodName = 'tháng này'; break;
+                        }
+                    }
+                    
+                    revenueHtml = `
+                        <div style="text-align: center; padding: 40px 20px; background: #f8f9fa; border-radius: 10px; border: 2px dashed #dee2e6;">
+                            <div style="font-size: 3em; margin-bottom: 15px;">📊</div>
+                            <h3 style="color: #6c757d; margin-bottom: 10px;">Chưa có dữ liệu</h3>
+                            <p style="color: #6c757d; margin-bottom: 20px;">Không có giao dịch nào trong khoảng thời gian <strong>${periodName}</strong></p>
+                            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                                <button onclick="showTab('entry')" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                                    ➕ Thêm Giao Dịch
+                                </button>
+                                <button onclick="setQuickFilter('week')" style="background: #17a2b8; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+                                    📊 Xem 7 Ngày Qua
+                                </button>
+                            </div>
+                        </div>
+                    `;
                 }
                 
                 machineRevenue.innerHTML = revenueHtml;

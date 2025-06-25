@@ -305,41 +305,36 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
             console.log('📊 Getting branch revenue with date filter...');
             branchRevenue = await db.getBranchRevenue(branchId, start_date, end_date);
             console.log('✅ getBranchRevenue success:', branchRevenue);
+            
+            // If no data returned, use empty array instead of fallback data
+            if (!branchRevenue || branchRevenue.length === 0) {
+                console.log('ℹ️ No branch revenue data found for period');
+                branchRevenue = [];
+            }
         } catch (error) {
             console.error('❌ getBranchRevenue failed:', error.message);
             console.error('Stack:', error.stack);
             
-            // Fallback to hardcoded data
-            branchRevenue = [
-                {
-                    branch_id: branchId || 1,
-                    branch_name: 'Chi Nhánh Quận 1 (Fallback)',
-                    total_revenue: 0,
-                    total_coins_in: 0,
-                    total_coins_out: 0,
-                    machine_count: 0
-                }
-            ];
+            // Return empty array instead of fallback data when there's no data
+            branchRevenue = [];
         }
         
         try {
             console.log('🎮 Getting machine revenue with date filter...');
             machineRevenue = await db.getRevenue(branchId, null, start_date, end_date);
             console.log('✅ getRevenue success:', machineRevenue);
+            
+            // If no data returned, use empty array instead of fallback data
+            if (!machineRevenue || machineRevenue.length === 0) {
+                console.log('ℹ️ No machine revenue data found for period');
+                machineRevenue = [];
+            }
         } catch (error) {
             console.error('❌ getRevenue failed:', error.message);
             console.error('Stack:', error.stack);
             
-            // Fallback to hardcoded data
-            machineRevenue = [
-                {
-                    branch_name: 'Chi Nhánh Quận 1 (Fallback)',
-                    machine_name: 'Máy Game 001 (Fallback)',
-                    total_revenue: 0,
-                    total_coins_in: 0,
-                    total_coins_out: 0
-                }
-            ];
+            // Return empty array instead of fallback data when there's no data
+            machineRevenue = [];
         }
         
         const totalRevenue = branchRevenue.reduce((sum, branch) => sum + (branch.total_revenue || 0), 0);
