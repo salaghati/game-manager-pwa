@@ -1,0 +1,7 @@
+<svg width="384" height="384" viewBox="0 0 384 384" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="384" height="384" rx="64" fill="#667eea"/>
+  <circle cx="192" cy="144" r="64" fill="white" opacity="0.9"/>
+  <rect x="144" y="168" width="96" height="48" rx="12" fill="white" opacity="0.9"/>
+  <rect x="160" y="216" width="64" height="32" rx="12" fill="white" opacity="0.9"/>
+  <text x="192" y="336" text-anchor="middle" fill="white" font-size="96" font-family="system-ui, Arial">🎮</text>
+</svg>

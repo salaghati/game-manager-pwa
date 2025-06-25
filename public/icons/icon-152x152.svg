@@ -1,0 +1,7 @@
+<svg width="152" height="152" viewBox="0 0 152 152" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="152" height="152" rx="25" fill="#667eea"/>
+  <circle cx="76" cy="57" r="25.333333333333332" fill="white" opacity="0.9"/>
+  <rect x="57" y="66.5" width="38" height="19" rx="4.75" fill="white" opacity="0.9"/>
+  <rect x="63.333333333333336" y="85.5" width="25.333333333333332" height="12.666666666666666" rx="4.75" fill="white" opacity="0.9"/>
+  <text x="76" y="133" text-anchor="middle" fill="white" font-size="38" font-family="system-ui, Arial">🎮</text>
+</svg>

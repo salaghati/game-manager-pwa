@@ -5,17 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Game Manager - Quản Lý Máy Chơi Game</title>
     
-    <!-- PWA Meta Tags -->
+    <!-- PWA Meta Tags cho iPhone -->
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Game Manager">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
     
-    <!-- Favicons và Icons -->
-    <link rel="icon" type="image/svg+xml" href="/icons/icon-192x192.svg">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg">
-    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.svg">
-    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.svg">
+    <!-- iPhone/iPad Splash Screens -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-startup-image" href="/icons/splash-2048x2732.svg" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/icons/splash-1668x2388.svg" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/icons/splash-1536x2048.svg" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/icons/splash-1284x2778.svg" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/icons/splash-1170x2532.svg" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/icons/splash-1125x2436.svg" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/icons/splash-828x1792.svg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.svg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    
+    <!-- Apple Touch Icons cho tất cả devices -->
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/icons/icon-32x32.svg">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/icons/icon-16x16.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.svg">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.svg">
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.svg">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.svg">
+    <link rel="apple-touch-icon" sizes="114x114" href="/icons/icon-114x114.svg">
+    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-76x76.svg">
+    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.svg">
+    <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-60x60.svg">
+    <link rel="apple-touch-icon" sizes="57x57" href="/icons/icon-57x57.svg">
+    <link rel="apple-touch-icon" href="/icons/icon-180x180.svg">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -38,6 +60,18 @@
             body {
                 padding: 5px;
                 overflow-x: hidden;
+                /* iPhone specific optimizations */
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* Fix for iPhone safe areas */
+            .container {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+                padding-left: env(safe-area-inset-left);
+                padding-right: env(safe-area-inset-right);
             }
             
             .container {
