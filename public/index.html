@@ -25,19 +25,19 @@
     <link rel="apple-touch-startup-image" href="/icons/splash-828x1792.svg" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     <link rel="apple-touch-startup-image" href="/icons/splash-750x1334.svg" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
     
-    <!-- Apple Touch Icons cho tất cả devices -->
-    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/icons/icon-32x32.svg">
-    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/icons/icon-16x16.svg">
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.svg">
-    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.svg">
-    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.svg">
-    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.svg">
-    <link rel="apple-touch-icon" sizes="114x114" href="/icons/icon-114x114.svg">
-    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-76x76.svg">
-    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.svg">
-    <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-60x60.svg">
-    <link rel="apple-touch-icon" sizes="57x57" href="/icons/icon-57x57.svg">
-    <link rel="apple-touch-icon" href="/icons/icon-180x180.svg">
+    <!-- Apple Touch Icons cho tất cả devices - PNG format cho iOS -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/icons/icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="/icons/icon-57x57.png">
+    <link rel="apple-touch-icon" href="/icons/icon-180x180.png">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -53,6 +53,86 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+        }
+
+        /* Machine Selector Styles */
+        .machine-selector {
+            position: relative;
+        }
+
+        .machine-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .machine-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f1f1;
+            transition: background-color 0.2s;
+        }
+
+        .machine-option:hover {
+            background-color: #f8f9fa;
+        }
+
+        .machine-option:last-child {
+            border-bottom: none;
+        }
+
+        .machine-option.selected {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .machine-option .machine-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .machine-option.selected .machine-name {
+            color: white;
+        }
+
+        .machine-option .machine-details {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .machine-option.selected .machine-details {
+            color: #e9ecef;
+        }
+
+        .selected-machine {
+            margin-top: 10px;
+            padding: 12px 15px;
+            background: #e8f4fd;
+            border: 1px solid #667eea;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #0d47a1;
+        }
+
+        .selected-machine .clear-selection {
+            float: right;
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 0;
+            margin: 0;
         }
 
         /* Mobile layout tối ưu - gọn gàng và ngang */
@@ -76,47 +156,98 @@
             
             .container {
                 max-width: 100%;
-                padding: 0;
+                padding: 8px;
             }
             
             .header {
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
             
             .header-title h1 {
-                font-size: 1.4em !important;
-                margin-bottom: 5px !important;
+                font-size: 1.6em !important;
+                margin-bottom: 8px !important;
             }
             
             .header-content {
-                flex-direction: row !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                gap: 10px !important;
-                flex-wrap: nowrap !important;
+                flex-direction: column !important;
+                gap: 15px !important;
             }
             
             .header-user {
-                padding: 8px 12px !important;
-                text-align: right !important;
-                border-radius: 10px !important;
-                min-width: auto !important;
-                width: auto !important;
+                padding: 12px 15px !important;
+                text-align: center !important;
+                border-radius: 12px !important;
+                width: 100% !important;
             }
             
             .header-user h3 {
-                font-size: 0.9em !important;
-                margin-bottom: 2px !important;
-            }
-            
-            .header-user p {
-                font-size: 0.8em !important;
+                font-size: 1em !important;
                 margin-bottom: 5px !important;
             }
             
+            .header-user p {
+                font-size: 0.9em !important;
+                margin-bottom: 8px !important;
+            }
+            
             .btn-logout {
-                padding: 6px 10px !important;
-                font-size: 12px !important;
+                padding: 8px 15px !important;
+                font-size: 14px !important;
+                width: 100% !important;
+            }
+
+            /* Tối ưu form cho mobile */
+            .form-group {
+                margin-bottom: 20px !important;
+            }
+
+            .form-group label {
+                font-size: 1.1em !important;
+                font-weight: 600 !important;
+                margin-bottom: 8px !important;
+            }
+
+            .form-group input, .form-group select, .form-group textarea {
+                font-size: 16px !important; /* Ngăn zoom trên iPhone */
+                padding: 15px !important;
+                border-radius: 10px !important;
+                height: auto !important;
+            }
+
+            .machine-dropdown {
+                font-size: 16px;
+            }
+
+            .machine-option {
+                padding: 15px 12px;
+                font-size: 16px;
+            }
+
+            .btn {
+                font-size: 16px !important;
+                padding: 15px 20px !important;
+                border-radius: 12px !important;
+                width: 100% !important;
+                margin-bottom: 10px !important;
+            }
+
+            /* Tab navigation cho mobile */
+            .tab-nav {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 5px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .tab-nav button {
+                flex: 1 !important;
+                min-width: 0 !important;
+                font-size: 14px !important;
+                padding: 12px 8px !important;
+                border-radius: 8px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
             }
         }
 
@@ -882,9 +1013,14 @@
 
                     <div class="form-group">
                         <label for="machine_id">Chọn Máy:</label>
-                        <select id="machine_id" required>
-                            <option value="">-- Chọn máy chơi game --</option>
-                        </select>
+                        <div class="machine-selector">
+                            <input type="text" id="machine_search" placeholder="🔍 Tìm máy (VD: 001, Tầng 1)..." autocomplete="off">
+                            <select id="machine_id" required style="display: none;">
+                                <option value="">-- Chọn máy chơi game --</option>
+                            </select>
+                            <div id="machine_dropdown" class="machine-dropdown" style="display: none;"></div>
+                        </div>
+                        <div id="selected_machine" class="selected-machine" style="display: none;"></div>
                     </div>
 
                     <div class="form-group">
@@ -1404,6 +1540,10 @@
             }
         }
 
+        // Global variables cho machine selector
+        let allMachines = [];
+        let selectedMachine = null;
+
         // Load danh sách máy
         async function loadMachines() {
             try {
@@ -1430,6 +1570,9 @@
                 });
                 const machines = await response.json();
                 
+                // Store machines globally cho search
+                allMachines = machines;
+                
                 const selects = ['machine_id', 'filter_machine'];
                 selects.forEach(selectId => {
                     const select = document.getElementById(selectId);
@@ -1451,10 +1594,140 @@
                     
                     select.value = currentValue;
                 });
+
+                // Initialize machine search cho form entry
+                initMachineSearch();
+                
             } catch (error) {
                 console.error('Lỗi khi load máy:', error);
                 showAlert('Lỗi khi tải danh sách máy chơi game', 'error');
             }
+        }
+
+        // Initialize machine search functionality
+        function initMachineSearch() {
+            const searchInput = document.getElementById('machine_search');
+            const dropdown = document.getElementById('machine_dropdown');
+            const hiddenSelect = document.getElementById('machine_id');
+            const selectedDiv = document.getElementById('selected_machine');
+
+            if (!searchInput || !dropdown) return;
+
+            // Show dropdown khi focus vào search
+            searchInput.addEventListener('focus', () => {
+                showMachineDropdown();
+            });
+
+            // Search while typing
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                filterMachines(query);
+            });
+
+            // Hide dropdown khi click outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.machine-selector')) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            // Prevent form submission on Enter in search
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    // Select first visible option
+                    const firstOption = dropdown.querySelector('.machine-option:not([style*="display: none"])');
+                    if (firstOption) {
+                        selectMachine(JSON.parse(firstOption.dataset.machine));
+                    }
+                }
+            });
+        }
+
+        function showMachineDropdown() {
+            const dropdown = document.getElementById('machine_dropdown');
+            if (!dropdown || allMachines.length === 0) return;
+
+            filterMachines(''); // Show all machines initially
+            dropdown.style.display = 'block';
+        }
+
+        function filterMachines(query) {
+            const dropdown = document.getElementById('machine_dropdown');
+            if (!dropdown) return;
+
+            const filteredMachines = allMachines.filter(machine => 
+                machine.name.toLowerCase().includes(query) ||
+                machine.location.toLowerCase().includes(query) ||
+                machine.branch_name.toLowerCase().includes(query)
+            );
+
+            dropdown.innerHTML = '';
+
+            if (filteredMachines.length === 0) {
+                dropdown.innerHTML = '<div class="machine-option" style="color: #666;">Không tìm thấy máy nào</div>';
+                return;
+            }
+
+            filteredMachines.forEach(machine => {
+                const option = document.createElement('div');
+                option.className = 'machine-option';
+                option.dataset.machine = JSON.stringify(machine);
+                option.innerHTML = `
+                    <div class="machine-name">${machine.name}</div>
+                    <div class="machine-details">📍 ${machine.location} | 🏢 ${machine.branch_name}</div>
+                `;
+                
+                option.addEventListener('click', () => {
+                    selectMachine(machine);
+                });
+
+                dropdown.appendChild(option);
+            });
+        }
+
+        function selectMachine(machine) {
+            selectedMachine = machine;
+            
+            const searchInput = document.getElementById('machine_search');
+            const dropdown = document.getElementById('machine_dropdown');
+            const hiddenSelect = document.getElementById('machine_id');
+            const selectedDiv = document.getElementById('selected_machine');
+
+            // Update search input
+            searchInput.value = `${machine.name} - ${machine.location}`;
+            
+            // Update hidden select for form submission
+            hiddenSelect.value = machine.id;
+            
+            // Show selected machine info
+            selectedDiv.innerHTML = `
+                🎮 <strong>${machine.name}</strong><br>
+                📍 ${machine.location} | 🏢 ${machine.branch_name}
+                <button type="button" class="clear-selection" onclick="clearMachineSelection()">✕</button>
+            `;
+            selectedDiv.style.display = 'block';
+            
+            // Hide dropdown
+            dropdown.style.display = 'none';
+
+            // Trigger change event for validation
+            hiddenSelect.dispatchEvent(new Event('change'));
+        }
+
+        function clearMachineSelection() {
+            selectedMachine = null;
+            
+            const searchInput = document.getElementById('machine_search');
+            const hiddenSelect = document.getElementById('machine_id');
+            const selectedDiv = document.getElementById('selected_machine');
+
+            searchInput.value = '';
+            hiddenSelect.value = '';
+            selectedDiv.style.display = 'none';
+
+            // Focus back to search
+            searchInput.focus();
         }
 
         // Xử lý form thêm giao dịch
