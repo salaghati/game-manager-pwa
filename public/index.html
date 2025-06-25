@@ -1645,9 +1645,10 @@
                 // Filter theo late entry nếu cần
                 if (lateEntryFilter) {
                     transactions = transactions.filter(transaction => {
-                        // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
-                        const today = new Date().toISOString().split('T')[0];
-                        const isLate = transaction.transaction_date < today;
+                        // Nhập muộn = ngày nhập dữ liệu > ngày giao dịch
+                        const createdDateStr = transaction.created_at.split('T')[0];
+                        const transactionDateStr = transaction.transaction_date;
+                        const isLate = createdDateStr > transactionDateStr;
                         if (lateEntryFilter === 'late') return isLate;
                         if (lateEntryFilter === 'ontime') return !isLate;
                         return true;
@@ -1685,15 +1686,17 @@
                             const transactionDate = new Date(transaction.transaction_date).toLocaleDateString('vi-VN');
                             
                             // Kiểm tra xem có nhập muộn không
-                            // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
-                            const today = new Date().toISOString().split('T')[0];
-                            const transactionDateStr = transaction.transaction_date; // Đã là yyyy-mm-dd
-                            const isLateEntry = transactionDateStr < today;
+                            // Nhập muộn = ngày nhập dữ liệu > ngày giao dịch
+                            // Ví dụ: GD ngày 23/6 nhưng nhập vào ngày 24/6 = nhập muộn
+                            const transactionDateStr = transaction.transaction_date; // yyyy-mm-dd
+                            const createdDateStr = transaction.created_at.split('T')[0]; // yyyy-mm-dd từ timestamp
+                            const isLateEntry = createdDateStr > transactionDateStr;
                             
                             console.log(`📅 Transaction Date: ${transactionDateStr}`);
                             console.log(`⏰ Created At: ${transaction.created_at}`);
+                            console.log(`⏰ Created Date: ${createdDateStr}`);
                             console.log(`⏰ Input Date: ${inputDate}`);
-                            console.log(`🔍 Is Late Entry: ${isLateEntry} (transaction_date < today)`);
+                            console.log(`🔍 Is Late Entry: ${isLateEntry} (created: ${createdDateStr} > transaction: ${transactionDateStr})`);
                             
                             historyHtml += `
                                 <div class="transaction-item">
@@ -1781,9 +1784,10 @@
             const lateUsers = {};
             
             transactions.forEach(transaction => {
-                // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
-                const today = new Date().toISOString().split('T')[0];
-                const isLate = transaction.transaction_date < today;
+                // Nhập muộn = ngày nhập dữ liệu > ngày giao dịch
+                const createdDateStr = transaction.created_at.split('T')[0];
+                const transactionDateStr = transaction.transaction_date;
+                const isLate = createdDateStr > transactionDateStr;
                 if (isLate) {
                     lateCount++;
                     if (transaction.user_name) {
