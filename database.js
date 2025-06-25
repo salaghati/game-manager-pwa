@@ -422,7 +422,7 @@ class Database {
                 paramIndex++;
             }
 
-            // Date filters only apply to transactions in the LEFT JOIN
+            // Date filters only apply to transactions in the LEFT JOIN  
             if (startDate) {
                 transactionFilters.push(`t.transaction_date::date >= $${paramIndex}::date`);
                 params.push(startDate);
@@ -435,18 +435,14 @@ class Database {
                 paramIndex++;
             }
 
-            // Combine filters properly
-            if (whereConditions.length > 0) {
-                query += " WHERE " + whereConditions.join(" AND ");
+            // Apply filters: machine/branch filters always apply, date filters only when transactions exist
+            const allConditions = [...whereConditions];
+            if (transactionFilters.length > 0) {
+                allConditions.push("(t.id IS NULL OR (" + transactionFilters.join(" AND ") + "))");
             }
             
-            if (transactionFilters.length > 0) {
-                if (whereConditions.length > 0) {
-                    query += " AND ";
-                } else {
-                    query += " WHERE ";
-                }
-                query += "(" + transactionFilters.join(" AND ") + " OR t.id IS NULL)";
+            if (allConditions.length > 0) {
+                query += " WHERE " + allConditions.join(" AND ");
             }
 
             query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
@@ -499,18 +495,14 @@ class Database {
                 params.push(endDate);
             }
 
-            // Combine filters properly
-            if (whereConditions.length > 0) {
-                query += " WHERE " + whereConditions.join(" AND ");
+            // Apply filters: machine/branch filters always apply, date filters only when transactions exist
+            const allConditions = [...whereConditions];
+            if (transactionFilters.length > 0) {
+                allConditions.push("(t.id IS NULL OR (" + transactionFilters.join(" AND ") + "))");
             }
             
-            if (transactionFilters.length > 0) {
-                if (whereConditions.length > 0) {
-                    query += " AND ";
-                } else {
-                    query += " WHERE ";
-                }
-                query += "(" + transactionFilters.join(" AND ") + " OR t.id IS NULL)";
+            if (allConditions.length > 0) {
+                query += " WHERE " + allConditions.join(" AND ");
             }
 
             query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
