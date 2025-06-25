@@ -390,7 +390,7 @@ class Database {
 
     // Lấy doanh thu theo chi nhánh, máy và thời gian
     async getRevenue(branchId = null, machineId = null, startDate = null, endDate = null) {
-        let query, params = [], whereConditions = [], paramIndex = 1;
+        let query, params = [], whereConditions = [], transactionFilters = [], paramIndex = 1;
         
         if (this.isPostgres) {
             query = `
@@ -399,15 +399,17 @@ class Database {
                     m.name as machine_name,
                     m.location,
                     m.branch_id,
-                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
-                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
-                    COALESCE(SUM(t.revenue), 0) as total_revenue,
+                    m.id as machine_id,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
                     COUNT(t.id) as transaction_count
                 FROM machines m
                 LEFT JOIN transactions t ON m.id = t.machine_id
                 JOIN branches b ON m.branch_id = b.id
             `;
             
+            // Machine/branch filters go in main WHERE
             if (branchId) {
                 whereConditions.push(`m.branch_id = $${paramIndex}`);
                 params.push(branchId);
@@ -420,20 +422,31 @@ class Database {
                 paramIndex++;
             }
 
+            // Date filters only apply to transactions in the LEFT JOIN
             if (startDate) {
-                whereConditions.push(`t.transaction_date::date >= $${paramIndex}::date`);
+                transactionFilters.push(`t.transaction_date::date >= $${paramIndex}::date`);
                 params.push(startDate);
                 paramIndex++;
             }
 
             if (endDate) {
-                whereConditions.push(`t.transaction_date::date <= $${paramIndex}::date`);
+                transactionFilters.push(`t.transaction_date::date <= $${paramIndex}::date`);
                 params.push(endDate);
                 paramIndex++;
             }
 
+            // Combine filters properly
             if (whereConditions.length > 0) {
                 query += " WHERE " + whereConditions.join(" AND ");
+            }
+            
+            if (transactionFilters.length > 0) {
+                if (whereConditions.length > 0) {
+                    query += " AND ";
+                } else {
+                    query += " WHERE ";
+                }
+                query += "(" + transactionFilters.join(" AND ") + " OR t.id IS NULL)";
             }
 
             query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
@@ -453,15 +466,17 @@ class Database {
                     m.name as machine_name,
                     m.location,
                     m.branch_id,
-                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
-                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
-                    COALESCE(SUM(t.revenue), 0) as total_revenue,
+                    m.id as machine_id,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
                     COUNT(t.id) as transaction_count
                 FROM machines m
                 LEFT JOIN transactions t ON m.id = t.machine_id
                 JOIN branches b ON m.branch_id = b.id
             `;
             
+            // Machine/branch filters go in main WHERE
             if (branchId) {
                 whereConditions.push("m.branch_id = ?");
                 params.push(branchId);
@@ -472,18 +487,30 @@ class Database {
                 params.push(machineId);
             }
 
+            // Date filters only apply to transactions in the LEFT JOIN
+            let transactionFilters = [];
             if (startDate) {
-                whereConditions.push("DATE(t.transaction_date) >= DATE(?)");
+                transactionFilters.push("DATE(t.transaction_date) >= DATE(?)");
                 params.push(startDate);
             }
 
             if (endDate) {
-                whereConditions.push("DATE(t.transaction_date) <= DATE(?)");
+                transactionFilters.push("DATE(t.transaction_date) <= DATE(?)");
                 params.push(endDate);
             }
 
+            // Combine filters properly
             if (whereConditions.length > 0) {
                 query += " WHERE " + whereConditions.join(" AND ");
+            }
+            
+            if (transactionFilters.length > 0) {
+                if (whereConditions.length > 0) {
+                    query += " AND ";
+                } else {
+                    query += " WHERE ";
+                }
+                query += "(" + transactionFilters.join(" AND ") + " OR t.id IS NULL)";
             }
 
             query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
