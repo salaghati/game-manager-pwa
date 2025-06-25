@@ -1362,9 +1362,23 @@
                     method: 'POST',
                     credentials: 'include'
                 });
+                
+                // Xóa saved credentials khi logout
+                localStorage.removeItem('saved_username');
+                localStorage.removeItem('saved_password');
+                localStorage.removeItem('remember_me');
+                localStorage.removeItem('remember_expiry');
+                
                 window.location.href = '/login.html';
             } catch (error) {
                 console.error('Logout error:', error);
+                
+                // Vẫn xóa credentials dù có lỗi
+                localStorage.removeItem('saved_username');
+                localStorage.removeItem('saved_password');
+                localStorage.removeItem('remember_me');
+                localStorage.removeItem('remember_expiry');
+                
                 window.location.href = '/login.html';
             }
         }

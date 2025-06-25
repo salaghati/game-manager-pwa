@@ -113,6 +113,12 @@
             border: 1px solid #f5c6cb;
         }
 
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
         .demo-accounts {
             margin-top: 30px;
             padding: 20px;
@@ -152,6 +158,28 @@
             color: #666;
         }
 
+        /* Remember Me Checkbox Styles */
+        .remember-me {
+            display: flex !important;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 400 !important;
+            margin-bottom: 0 !important;
+            font-size: 15px;
+            color: #555;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: auto !important;
+            margin-right: 10px;
+            transform: scale(1.2);
+            accent-color: #667eea;
+        }
+
+        .remember-me:hover {
+            color: #667eea;
+        }
+
         @media (max-width: 480px) {
             .login-container {
                 margin: 0 10px;
@@ -186,6 +214,14 @@
                 <div class="form-group">
                     <label for="password">Mật khẩu:</label>
                     <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember_me" name="remember_me" checked>
+                        <span class="checkmark"></span>
+                        💾 Ghi nhớ đăng nhập (30 ngày)
+                    </label>
                 </div>
 
                 <button type="submit" class="btn-login" id="loginBtn">
@@ -236,6 +272,54 @@
             document.getElementById('loginForm').dispatchEvent(new Event('submit'));
         }
 
+        // Load saved credentials nếu có remember me
+        function loadSavedCredentials() {
+            const savedUsername = localStorage.getItem('saved_username');
+            const savedPassword = localStorage.getItem('saved_password');
+            const rememberMe = localStorage.getItem('remember_me') === 'true';
+            
+            if (rememberMe && savedUsername && savedPassword) {
+                document.getElementById('username').value = savedUsername;
+                document.getElementById('password').value = savedPassword;
+                document.getElementById('remember_me').checked = true;
+                
+                // Auto login nếu có saved credentials
+                setTimeout(() => {
+                    const loginForm = document.getElementById('loginForm');
+                    loginForm.dispatchEvent(new Event('submit'));
+                }, 500);
+            }
+        }
+
+        // Save credentials nếu remember me được chọn
+        function saveCredentials(username, password, rememberMe) {
+            if (rememberMe) {
+                localStorage.setItem('saved_username', username);
+                localStorage.setItem('saved_password', password);
+                localStorage.setItem('remember_me', 'true');
+                localStorage.setItem('remember_expiry', Date.now() + (30 * 24 * 60 * 60 * 1000)); // 30 ngày
+            } else {
+                localStorage.removeItem('saved_username');
+                localStorage.removeItem('saved_password');
+                localStorage.removeItem('remember_me');
+                localStorage.removeItem('remember_expiry');
+            }
+        }
+
+        // Check nếu remember me đã hết hạn
+        function checkRememberExpiry() {
+            const expiry = localStorage.getItem('remember_expiry');
+            if (expiry && Date.now() > parseInt(expiry)) {
+                // Hết hạn, xóa saved credentials
+                localStorage.removeItem('saved_username');
+                localStorage.removeItem('saved_password');
+                localStorage.removeItem('remember_me');
+                localStorage.removeItem('remember_expiry');
+                return false;
+            }
+            return true;
+        }
+
         // Xử lý form đăng nhập
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -243,6 +327,7 @@
             const loginBtn = document.getElementById('loginBtn');
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('remember_me').checked;
             
             // Disable button khi đang xử lý
             loginBtn.disabled = true;
@@ -255,12 +340,15 @@
                         'Content-Type': 'application/json'
                     },
                     credentials: 'include',
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, remember_me: rememberMe })
                 });
 
                 const result = await response.json();
                 
                 if (response.ok && result.success) {
+                    // Save credentials nếu remember me được chọn
+                    saveCredentials(username, password, rememberMe);
+                    
                     // Đăng nhập thành công, chuyển về trang chính
                     showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
                     setTimeout(() => {
@@ -289,14 +377,30 @@
                 if (response.ok) {
                     // Đã đăng nhập, chuyển về trang chính
                     window.location.href = '/';
+                    return true;
                 }
             } catch (error) {
                 // Chưa đăng nhập, ở lại trang login
             }
+            return false;
         }
 
-        // Check auth khi load trang
-        checkAuth();
+        // Initialize page
+        async function initializePage() {
+            // Check expiry của remember me
+            checkRememberExpiry();
+            
+            // Check nếu đã đăng nhập
+            const isLoggedIn = await checkAuth();
+            
+            // Nếu chưa đăng nhập, load saved credentials
+            if (!isLoggedIn) {
+                loadSavedCredentials();
+            }
+        }
+
+        // Initialize khi load trang
+        initializePage();
     </script>
 </body>
 </html> 

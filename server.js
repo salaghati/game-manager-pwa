@@ -110,11 +110,19 @@ app.get('/', (req, res) => {
 // Authentication routes
 app.post('/api/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, remember_me } = req.body;
         const user = await db.authenticateUser(username, password);
         
         if (user) {
             req.session.user = user;
+            
+            // Extend session expiry nếu remember me
+            if (remember_me) {
+                req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 ngày
+            } else {
+                req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 giờ mặc định
+            }
+            
             res.json({ 
                 success: true, 
                 user: {
@@ -124,7 +132,8 @@ app.post('/api/login', async (req, res) => {
                     role: user.role,
                     branch_id: user.branch_id,
                     branch_name: user.branch_name
-                }
+                },
+                remember_me: remember_me
             });
         } else {
             res.status(401).json({ error: 'Tên đăng nhập hoặc mật khẩu không đúng' });
