@@ -1435,9 +1435,10 @@
                     const lateUsers = {};
                     
                                          transactions.forEach(transaction => {
-                         // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
-                         const today = new Date().toISOString().split('T')[0];
-                         const isLate = transaction.transaction_date < today;
+                         // Nhập muộn = ngày nhập > ngày giao dịch
+                         const createdDateStr = new Date(transaction.created_at).toISOString().split('T')[0];
+                         const transactionDateStr = transaction.transaction_date;
+                         const isLate = createdDateStr > transactionDateStr;
                          if (isLate) {
                              lateCount++;
                              if (transaction.user_name) {
@@ -1495,9 +1496,10 @@
                                     });
                                     const inputDate = createdTime.toLocaleDateString('vi-VN');
                                     const transactionDate = new Date(transaction.transaction_date).toLocaleDateString('vi-VN');
-                                                                         // Nhập muộn = ngày giao dịch < ngày hiện tại (hôm nay)
-                                     const today = new Date().toISOString().split('T')[0];
-                                     const isLate = transaction.transaction_date < today;
+                                    // Nhập muộn = ngày nhập > ngày giao dịch
+                                    const createdDateStr = new Date(transaction.created_at).toISOString().split('T')[0];
+                                    const transactionDateStr = transaction.transaction_date;
+                                    const isLate = createdDateStr > transactionDateStr;
                                     
                                     return `
                                         <div style="background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid ${transaction.revenue >= 0 ? '#28a745' : '#dc3545'};">
