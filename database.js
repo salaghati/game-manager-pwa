@@ -273,13 +273,13 @@ class Database {
             const result = await this.pool.query("SELECT * FROM branches ORDER BY id");
             return result.rows;
         } else {
-            return new Promise((resolve, reject) => {
-                this.db.all("SELECT * FROM branches ORDER BY id", (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                });
+        return new Promise((resolve, reject) => {
+            this.db.all("SELECT * FROM branches ORDER BY id", (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
             });
-        }
+        });
+    }
     }
 
     async getUsers(branchId = null) {
@@ -293,18 +293,18 @@ class Database {
             return new Promise((resolve, reject) => {
                 const sqliteQuery = query.replace('$1', '?');
                 this.db.all(sqliteQuery, branchId ? [branchId] : [], (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                });
+                if (err) reject(err);
+                else resolve(rows);
             });
-        }
+        });
+    }
     }
 
     async getAllMachines(branchId = null) {
         const query = `
-            SELECT m.*, b.name as branch_name 
-            FROM machines m
-            JOIN branches b ON m.branch_id = b.id
+                SELECT m.*, b.name as branch_name 
+                FROM machines m
+                JOIN branches b ON m.branch_id = b.id
         ` + (branchId ? " WHERE m.branch_id = $1" : "") + " ORDER BY m.branch_id, m.id";
         
         if (this.isPostgres) {
@@ -314,11 +314,11 @@ class Database {
             return new Promise((resolve, reject) => {
                 const sqliteQuery = query.replace('$1', '?');
                 this.db.all(sqliteQuery, branchId ? [branchId] : [], (err, rows) => {
-                    if (err) reject(err);
-                    else resolve(rows);
-                });
+                if (err) reject(err);
+                else resolve(rows);
             });
-        }
+        });
+    }
     }
 
     // Xác thực người dùng (đã fix bug - so sánh với password trong database)
@@ -341,33 +341,33 @@ class Database {
                 return null;
             }
         } else {
-            return new Promise((resolve, reject) => {
-                this.db.get(`
-                    SELECT u.*, b.name as branch_name 
-                    FROM users u 
-                    LEFT JOIN branches b ON u.branch_id = b.id 
-                    WHERE u.username = ?
-                `, [username], (err, row) => {
-                    if (err) reject(err);
-                    else if (!row) resolve(null);
-                    else {
+        return new Promise((resolve, reject) => {
+            this.db.get(`
+                SELECT u.*, b.name as branch_name 
+                FROM users u 
+                LEFT JOIN branches b ON u.branch_id = b.id 
+                WHERE u.username = ?
+            `, [username], (err, row) => {
+                if (err) reject(err);
+                else if (!row) resolve(null);
+                else {
                         // So sánh với password trong database
                         if (password === row.password) {
-                            resolve(row);
-                        } else {
-                            resolve(null);
-                        }
+                        resolve(row);
+                    } else {
+                        resolve(null);
                     }
-                });
+                }
             });
+        });
         }
     }
 
     // Thêm giao dịch mới
     async addTransaction(machineId, branchId, userId, coinsIn, coinsOut, note = '', transactionDate = null) {
-        const revenue = coinsIn - coinsOut;
-        const txDate = transactionDate || new Date().toISOString().split('T')[0];
-        
+            const revenue = coinsIn - coinsOut;
+            const txDate = transactionDate || new Date().toISOString().split('T')[0];
+            
         if (this.isPostgres) {
             const result = await this.pool.query(
                 "INSERT INTO transactions (machine_id, branch_id, user_id, coins_in, coins_out, revenue, note, transaction_date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
@@ -376,15 +376,15 @@ class Database {
             return { id: result.rows[0].id, revenue };
         } else {
             return new Promise((resolve, reject) => {
-                this.db.run(
-                    "INSERT INTO transactions (machine_id, branch_id, user_id, coins_in, coins_out, revenue, note, transaction_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    [machineId, branchId, userId, coinsIn, coinsOut, revenue, note, txDate],
-                    function(err) {
-                        if (err) reject(err);
-                        else resolve({ id: this.lastID, revenue });
-                    }
-                );
-            });
+            this.db.run(
+                "INSERT INTO transactions (machine_id, branch_id, user_id, coins_in, coins_out, revenue, note, transaction_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                [machineId, branchId, userId, coinsIn, coinsOut, revenue, note, txDate],
+                function(err) {
+                    if (err) reject(err);
+                    else resolve({ id: this.lastID, revenue });
+                }
+            );
+        });
         }
     }
 
@@ -518,7 +518,7 @@ class Database {
             console.log('🔍 Query params:', params);
 
             return new Promise((resolve, reject) => {
-                this.db.all(query, params, (err, rows) => {
+            this.db.all(query, params, (err, rows) => {
                     if (err) {
                         console.error('Error in getRevenue (SQLite):', err);
                         reject(err);
@@ -529,8 +529,8 @@ class Database {
                         }
                         resolve(rows);
                     }
-                });
             });
+        });
         }
     }
 
@@ -603,7 +603,7 @@ class Database {
                 LEFT JOIN machines m ON b.id = m.branch_id
                 LEFT JOIN transactions t ON m.id = t.machine_id
             `;
-            
+
             if (branchId) {
                 whereConditions.push("b.id = ?");
                 params.push(branchId);
@@ -626,15 +626,15 @@ class Database {
             query += " GROUP BY b.id ORDER BY b.id";
 
             return new Promise((resolve, reject) => {
-                this.db.all(query, params, (err, rows) => {
+            this.db.all(query, params, (err, rows) => {
                     if (err) {
                         console.error('Error in getBranchRevenue (SQLite):', err);
                         reject(err);
                     } else {
                         resolve(rows);
                     }
-                });
             });
+        });
         }
     }
 
@@ -882,7 +882,7 @@ class Database {
                     COALESCE(SUM(revenue), 0) as total_revenue
                 FROM transactions t
             `;
-            
+
             if (branchId) {
                 whereConditions.push("t.branch_id = ?");
                 params.push(branchId);
@@ -913,15 +913,15 @@ class Database {
             }
 
             return new Promise((resolve, reject) => {
-                this.db.get(query, params, (err, row) => {
+            this.db.get(query, params, (err, row) => {
                     if (err) {
                         console.error('Error in getTransactionSummary (SQLite):', err);
                         reject(err);
                     } else {
                         resolve(row);
                     }
-                });
             });
+        });
         }
     }
 
@@ -947,7 +947,7 @@ class Database {
             // SQLite version
             let query = 'DELETE FROM transactions';
             let params = [];
-            
+
             if (branchId) {
                 query += ' WHERE branch_id = ?';
                 params.push(branchId);
@@ -961,8 +961,8 @@ class Database {
                     } else {
                         resolve({ deletedCount: this.changes });
                     }
-                });
             });
+        });
         }
     }
 
@@ -970,7 +970,7 @@ class Database {
         if (this.isPostgres) {
             this.pool.end();
         } else {
-            this.db.close();
+        this.db.close();
         }
     }
 }

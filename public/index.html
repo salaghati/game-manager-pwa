@@ -2311,6 +2311,123 @@
                 -webkit-tap-highlight-color: transparent;
             }
         }
+
+        /* iPhone specific machine/branch items layout */
+        @media screen and (min-width: 375px) and (max-width: 428px) {
+            /* Machine list tối ưu */
+            .machine-item {
+                padding: 12px !important;
+                margin-bottom: 8px !important;
+                border-radius: 10px !important;
+                font-size: 14px !important;
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+            }
+            
+            .machine-item > div:first-child {
+                flex: 1 !important;
+                min-width: 0 !important;
+            }
+            
+            .machine-item > div:last-child {
+                flex-shrink: 0 !important;
+                text-align: right !important;
+                min-width: 80px !important;
+            }
+            
+            .machine-item strong {
+                font-size: 15px !important;
+                display: block !important;
+                margin-bottom: 4px !important;
+                line-height: 1.2 !important;
+            }
+            
+            .machine-item small {
+                font-size: 11px !important;
+                line-height: 1.3 !important;
+                color: #666 !important;
+                display: block !important;
+                margin-top: 2px !important;
+            }
+            
+            /* Compact stats display in machine items */
+            .machine-item .revenue-stats {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-end !important;
+                gap: 2px !important;
+            }
+            
+            .machine-item .revenue-amount {
+                font-size: 16px !important;
+                font-weight: 700 !important;
+                line-height: 1 !important;
+            }
+            
+            .machine-item .revenue-details {
+                font-size: 10px !important;
+                color: #666 !important;
+                line-height: 1 !important;
+            }
+            
+            .machine-item .revenue-badge {
+                font-size: 9px !important;
+                padding: 2px 6px !important;
+                border-radius: 8px !important;
+                margin-top: 2px !important;
+                line-height: 1 !important;
+            }
+            
+            /* Branch items layout */
+            .branch-item,
+            .machine-item[data-type="branch"] {
+                padding: 15px 12px !important;
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+                border-left: 4px solid #667eea !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .branch-item .branch-stats,
+            .machine-item .branch-stats {
+                display: grid !important;
+                grid-template-columns: 1fr auto !important;
+                gap: 15px !important;
+                align-items: center !important;
+            }
+            
+            .branch-info h4 {
+                font-size: 16px !important;
+                margin-bottom: 4px !important;
+                color: #333 !important;
+            }
+            
+            .branch-info .meta {
+                font-size: 11px !important;
+                color: #666 !important;
+                line-height: 1.3 !important;
+            }
+            
+            .branch-revenue {
+                text-align: right !important;
+            }
+            
+            .branch-revenue .amount {
+                font-size: 18px !important;
+                font-weight: 700 !important;
+                color: #28a745 !important;
+                line-height: 1 !important;
+            }
+            
+            .branch-revenue .details {
+                font-size: 10px !important;
+                color: #666 !important;
+                margin-top: 2px !important;
+                line-height: 1.2 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3354,15 +3471,15 @@
                     revenueHtml += '<h3>🏢 Doanh Thu Theo Chi Nhánh</h3>';
                     data.branches.forEach(branch => {
                         revenueHtml += `
-                            <div class="machine-item">
-                                <div>
-                                    <strong>${branch.branch_name}</strong><br>
-                                    <small>📍 ${branch.address || 'N/A'} | 👨‍💼 ${branch.manager_name || 'N/A'}</small><br>
-                                    <small>🎮 ${branch.machine_count || 0} máy</small>
+                            <div class="machine-item branch-item" data-type="branch">
+                                <div class="branch-info">
+                                    <strong>${branch.branch_name}</strong>
+                                    <small style="color: #666;">📍 ${branch.address || 'N/A'}</small>
+                                    <small style="color: #888;">👨‍💼 ${branch.manager_name || 'N/A'} • 🎮 ${branch.machine_count || 0} máy</small>
                                 </div>
-                                <div style="text-align: right;">
-                                    <strong style="color: #28a745;">${branch.total_revenue || 0} xu</strong><br>
-                                    <small>Vào: ${branch.total_coins_in || 0} | Ra: ${branch.total_coins_out || 0}</small>
+                                <div class="branch-revenue">
+                                    <div class="amount">${(branch.total_revenue || 0).toLocaleString()}</div>
+                                    <div class="details">${(branch.total_coins_in || 0).toLocaleString()}|${(branch.total_coins_out || 0).toLocaleString()}</div>
                                 </div>
                             </div>
                         `;
@@ -3398,24 +3515,23 @@
                         const revenueIcon = revenue > 0 ? '📈' : revenue < 0 ? '📉' : '➖';
                         
                         revenueHtml += `
-                            <div class="machine-item" style="margin-bottom: 12px;">
+                            <div class="machine-item" style="margin-bottom: 8px;">
                                 <div>
                                     <strong>${machineName}</strong>
-                                    <span style="margin-left: 8px; background: ${revenue > 0 ? '#d4edda' : revenue < 0 ? '#f8d7da' : '#e9ecef'}; 
-                                                 color: ${revenue > 0 ? '#155724' : revenue < 0 ? '#721c24' : '#495057'}; 
-                                                 padding: 2px 6px; border-radius: 12px; font-size: 11px;">
-                                        ${revenueIcon} ${winRate}%
-                                    </span><br>
-                                    <small style="color: #666;">📍 ${location} | 🏢 ${branchName}</small><br>
-                                    <small style="color: #888;">📊 ${transactionCount} giao dịch</small>
+                                    <small style="color: #666;">📍 ${location}</small>
+                                    <small style="color: #888;">🏢 ${branchName} • 📊 ${transactionCount} GD</small>
                                 </div>
-                                <div style="text-align: right;">
-                                    <strong style="color: ${revenueClass}; font-size: 1.1em;">
-                                        ${revenue > 0 ? '+' : ''}${revenue.toLocaleString()} xu
-                                    </strong><br>
-                                    <small style="color: #666;">
-                                        Vào: ${coinsIn.toLocaleString()} | Ra: ${coinsOut.toLocaleString()}
-                                    </small>
+                                <div class="revenue-stats">
+                                    <div class="revenue-amount" style="color: ${revenueClass};">
+                                        ${revenue > 0 ? '+' : ''}${Math.abs(revenue).toLocaleString()}
+                                    </div>
+                                    <div class="revenue-details">
+                                        ${coinsIn.toLocaleString()}|${coinsOut.toLocaleString()}
+                                    </div>
+                                    <div class="revenue-badge" style="background: ${revenue > 0 ? '#d4edda' : revenue < 0 ? '#f8d7da' : '#e9ecef'}; 
+                                                 color: ${revenue > 0 ? '#155724' : revenue < 0 ? '#721c24' : '#495057'};">
+                                        ${revenueIcon} ${winRate}%
+                                    </div>
                                 </div>
                             </div>
                         `;
