@@ -2557,6 +2557,38 @@
                 justify-content: space-between !important;
             }
         }
+
+        /* DEBUG: Visual indicator for mobile devices */
+        @media screen and (max-width: 768px) {
+            body::before {
+                content: "📱 MOBILE MODE ACTIVE";
+                position: fixed;
+                top: 0;
+                left: 0;
+                background: red;
+                color: white;
+                padding: 5px 10px;
+                font-size: 12px;
+                z-index: 9999;
+                border-radius: 0 0 8px 0;
+            }
+        }
+        
+        /* DEBUG: iPhone specific indicator */
+        @media screen and (max-width: 428px) {
+            body::after {
+                content: "🍎 iPHONE DETECTED";
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                background: blue;
+                color: white;
+                padding: 5px 10px;
+                font-size: 12px;
+                z-index: 9999;
+                border-radius: 8px 8px 0 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2834,6 +2866,39 @@
             loadDashboard();
             
             // iPhone specific optimizations
+            // Force horizontal layout for machine items on mobile
+            function forceMobileLayout() {
+                const machineItems = document.querySelectorAll('.machine-item');
+                machineItems.forEach(item => {
+                    if (window.innerWidth <= 768) {
+                        item.style.display = 'flex';
+                        item.style.flexDirection = 'row';
+                        item.style.justifyContent = 'space-between';
+                        item.style.alignItems = 'flex-start';
+                        item.style.gap = '10px';
+                        
+                        // First div (info)
+                        const firstDiv = item.querySelector('div:first-child');
+                        if (firstDiv) {
+                            firstDiv.style.flex = '1';
+                            firstDiv.style.minWidth = '0';
+                        }
+                        
+                        // Last div (revenue)
+                        const lastDiv = item.querySelector('div:last-child');
+                        if (lastDiv) {
+                            lastDiv.style.flexShrink = '0';
+                            lastDiv.style.textAlign = 'right';
+                            lastDiv.style.minWidth = '80px';
+                        }
+                    }
+                });
+            }
+            
+            // Run on load and when content changes
+            forceMobileLayout();
+            setInterval(forceMobileLayout, 2000); // Check every 2 seconds
+            
             // Prevent zoom on input focus cho iPhone
             const viewportMeta = document.querySelector('meta[name="viewport"]');
             if (viewportMeta) {
