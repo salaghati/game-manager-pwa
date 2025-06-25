@@ -741,6 +741,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .machine-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .machine-item[data-revenue="positive"] {
+            border-left-color: #28a745;
+        }
+
+        .machine-item[data-revenue="negative"] {
+            border-left-color: #dc3545;
+        }
+
+        .machine-item[data-revenue="zero"] {
+            border-left-color: #6c757d;
         }
 
         .transaction-history {
@@ -1874,11 +1893,16 @@
                     });
                 }
 
-                // Hiển thị doanh thu theo máy
+                // Hiển thị doanh thu theo máy - LUÔN hiển thị section này
+                revenueHtml += '<h3 style="margin-top: 20px;">🎮 Doanh Thu Theo Máy</h3>';
+                
                 if (data.machines && data.machines.length > 0) {
                     console.log('🎮 Machine data from API:', data.machines);
-                    revenueHtml += '<h3 style="margin-top: 20px;">🎮 Doanh Thu Theo Máy</h3>';
-                    data.machines.forEach((machine, index) => {
+                    
+                    // Sort machines theo doanh thu giảm dần
+                    const sortedMachines = data.machines.sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0));
+                    
+                    sortedMachines.forEach((machine, index) => {
                         console.log(`Machine ${index}:`, machine);
                         const machineName = machine.machine_name || machine.name || 'Máy không xác định';
                         const location = machine.location || 'Vị trí không xác định';
@@ -1886,20 +1910,54 @@
                         const revenue = machine.total_revenue || 0;
                         const coinsIn = machine.total_coins_in || 0;
                         const coinsOut = machine.total_coins_out || 0;
+                        const transactionCount = machine.transaction_count || 0;
+                        
+                        // Tính tỷ lệ thắng/thua cho máy
+                        const winRate = coinsIn > 0 ? ((revenue / coinsIn) * 100).toFixed(1) : '0.0';
+                        const revenueClass = revenue > 0 ? '#28a745' : revenue < 0 ? '#dc3545' : '#6c757d';
+                        const revenueIcon = revenue > 0 ? '📈' : revenue < 0 ? '📉' : '➖';
                         
                         revenueHtml += `
-                            <div class="machine-item">
+                            <div class="machine-item" style="margin-bottom: 12px;">
                                 <div>
-                                    <strong>${machineName}</strong><br>
-                                    <small>📍 ${location} | 🏢 ${branchName}</small>
+                                    <strong>${machineName}</strong>
+                                    <span style="margin-left: 8px; background: ${revenue > 0 ? '#d4edda' : revenue < 0 ? '#f8d7da' : '#e9ecef'}; 
+                                                 color: ${revenue > 0 ? '#155724' : revenue < 0 ? '#721c24' : '#495057'}; 
+                                                 padding: 2px 6px; border-radius: 12px; font-size: 11px;">
+                                        ${revenueIcon} ${winRate}%
+                                    </span><br>
+                                    <small style="color: #666;">📍 ${location} | 🏢 ${branchName}</small><br>
+                                    <small style="color: #888;">📊 ${transactionCount} giao dịch</small>
                                 </div>
                                 <div style="text-align: right;">
-                                    <strong style="color: ${revenue >= 0 ? '#28a745' : '#dc3545'};">${revenue > 0 ? '+' : ''}${revenue} xu</strong><br>
-                                    <small>Vào: ${coinsIn} | Ra: ${coinsOut}</small>
+                                    <strong style="color: ${revenueClass}; font-size: 1.1em;">
+                                        ${revenue > 0 ? '+' : ''}${revenue.toLocaleString()} xu
+                                    </strong><br>
+                                    <small style="color: #666;">
+                                        Vào: ${coinsIn.toLocaleString()} | Ra: ${coinsOut.toLocaleString()}
+                                    </small>
                                 </div>
                             </div>
                         `;
                     });
+                } else {
+                    // Fallback: Hiển thị danh sách máy hiện có với doanh thu 0
+                    revenueHtml += `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px dashed #dee2e6;">
+                            <p style="color: #6c757d; margin: 0; text-align: center;">
+                                📊 Chưa có giao dịch nào trong khoảng thời gian này
+                            </p>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #666; font-size: 0.95em; margin-bottom: 10px;">📋 Danh sách máy hiện có:</h4>
+                            <div id="available-machines-list">
+                                <div style="color: #666; font-style: italic;">Đang tải danh sách máy...</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Load danh sách máy để hiển thị fallback
+                    loadAvailableMachinesForDashboard(branchId);
                 }
                 
                 if (!revenueHtml) {
@@ -1945,6 +2003,50 @@
             } catch (error) {
                 console.error('Lỗi khi load dashboard:', error);
                 showAlert('Lỗi khi tải dữ liệu dashboard', 'error');
+            }
+        }
+
+        // Load danh sách máy để hiển thị khi không có data
+        async function loadAvailableMachinesForDashboard(branchId) {
+            try {
+                let url = `${API_BASE}/api/machines`;
+                if (branchId) {
+                    url += `?branch_id=${branchId}`;
+                }
+                
+                const response = await fetch(url, {
+                    credentials: 'include'
+                });
+                const machines = await response.json();
+                
+                const machinesList = document.getElementById('available-machines-list');
+                if (machinesList) {
+                    if (machines && machines.length > 0) {
+                        let machinesHtml = '';
+                        machines.forEach(machine => {
+                            machinesHtml += `
+                                <div class="machine-item" style="margin-bottom: 8px; opacity: 0.7;">
+                                    <div>
+                                        <strong>${machine.name}</strong><br>
+                                        <small style="color: #666;">📍 ${machine.location} | 🏢 ${machine.branch_name}</small>
+                                    </div>
+                                    <div style="text-align: right; color: #6c757d;">
+                                        <span style="font-size: 0.9em;">Chưa có giao dịch</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        machinesList.innerHTML = machinesHtml;
+                    } else {
+                        machinesList.innerHTML = '<div style="color: #999; font-style: italic;">Không có máy nào được tìm thấy</div>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading available machines:', error);
+                const machinesList = document.getElementById('available-machines-list');
+                if (machinesList) {
+                    machinesList.innerHTML = '<div style="color: #999;">Không thể tải danh sách máy</div>';
+                }
             }
         }
 
