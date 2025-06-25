@@ -1849,6 +1849,9 @@
                 const data = await response.json();
                 
                 console.log('📦 Dashboard API Response:', data);
+                console.log('📦 Dashboard machines array:', data.machines);
+                console.log('📦 Dashboard machines type:', typeof data.machines);
+                console.log('📦 Dashboard machines length:', data.machines?.length);
 
                 // Hiển thị stats tổng quan
                 const statsGrid = document.getElementById('stats-grid');
@@ -1897,14 +1900,18 @@
                 // Hiển thị doanh thu theo máy - LUÔN hiển thị section này
                 revenueHtml += '<h3 style="margin-top: 20px;">🎮 Doanh Thu Theo Máy</h3>';
                 
-                if (data.machines && data.machines.length > 0) {
-                    console.log('🎮 Machine data from API:', data.machines);
+                // Fix: đảm bảo data.machines là array
+                const machinesArray = Array.isArray(data.machines) ? data.machines : [];
+                console.log('🎮 Machines array after fix:', machinesArray);
+                
+                if (machinesArray && machinesArray.length > 0) {
+                    console.log('🎮 Machine data from API:', machinesArray);
                     
                     // Store dashboard machines để so sánh với recent transactions
-                    window.lastDashboardMachines = data.machines;
+                    window.lastDashboardMachines = machinesArray;
                     
                     // Sort machines theo doanh thu giảm dần
-                    const sortedMachines = data.machines.sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0));
+                    const sortedMachines = machinesArray.sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0));
                     
                     sortedMachines.forEach((machine, index) => {
                         console.log(`🎮 Machine ${index}:`, machine);
@@ -2082,6 +2089,9 @@
                 
                 // So sánh machine data giữa dashboard và recent transactions
                 console.log('🔍 COMPARISON ANALYSIS:');
+                console.log('🔍 window.lastDashboardMachines:', window.lastDashboardMachines);
+                console.log('🔍 transactions length:', transactions?.length);
+                console.log('🔍 Condition check:', window.lastDashboardMachines && transactions?.length > 0);
                 if (window.lastDashboardMachines && transactions?.length > 0) {
                     const dashboardMachineIds = window.lastDashboardMachines.map(m => m.machine_id || m.id);
                     const recentTransactionMachineIds = [...new Set(transactions.map(t => t.machine_id))];

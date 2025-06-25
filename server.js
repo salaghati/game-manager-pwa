@@ -332,6 +332,9 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
             console.log('🎮 Getting machine revenue with date filter...');
             machineRevenue = await db.getRevenue(branchId, null, start_date, end_date);
             console.log('✅ getRevenue success:', machineRevenue);
+            console.log('✅ getRevenue type:', typeof machineRevenue);
+            console.log('✅ getRevenue isArray:', Array.isArray(machineRevenue));
+            console.log('✅ getRevenue length:', machineRevenue?.length);
             
             // If no data returned, use empty array instead of fallback data
             if (!machineRevenue || machineRevenue.length === 0) {
@@ -351,7 +354,7 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
         const totalCoinsOut = branchRevenue.reduce((sum, branch) => sum + (branch.total_coins_out || 0), 0);
         const totalMachines = branchRevenue.reduce((sum, branch) => sum + (branch.machine_count || 0), 0);
         
-        res.json({
+        const responseData = {
             total_revenue: totalRevenue,
             total_coins_in: totalCoinsIn,
             total_coins_out: totalCoinsOut,
@@ -359,7 +362,13 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
             branch_count: branchRevenue.length,
             branches: branchRevenue,
             machines: machineRevenue
-        });
+        };
+        
+        console.log('📤 Final dashboard response:', responseData);
+        console.log('📤 machines field type:', typeof responseData.machines);
+        console.log('📤 machines field isArray:', Array.isArray(responseData.machines));
+        
+        res.json(responseData);
     } catch (error) {
         console.error('Error getting dashboard data:', error);
         res.status(500).json({ error: 'Lỗi khi lấy dữ liệu dashboard' });
