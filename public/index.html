@@ -1529,17 +1529,26 @@
 
                 // Hiển thị doanh thu theo máy
                 if (data.machines && data.machines.length > 0) {
+                    console.log('🎮 Machine data from API:', data.machines);
                     revenueHtml += '<h3 style="margin-top: 20px;">🎮 Doanh Thu Theo Máy</h3>';
-                    data.machines.forEach(machine => {
+                    data.machines.forEach((machine, index) => {
+                        console.log(`Machine ${index}:`, machine);
+                        const machineName = machine.machine_name || machine.name || 'Máy không xác định';
+                        const location = machine.location || 'Vị trí không xác định';
+                        const branchName = machine.branch_name || 'Chi nhánh không xác định';
+                        const revenue = machine.total_revenue || 0;
+                        const coinsIn = machine.total_coins_in || 0;
+                        const coinsOut = machine.total_coins_out || 0;
+                        
                         revenueHtml += `
                             <div class="machine-item">
                                 <div>
-                                    <strong>${machine.machine_name}</strong><br>
-                                    <small>📍 ${machine.location} | 🏢 ${machine.branch_name}</small>
+                                    <strong>${machineName}</strong><br>
+                                    <small>📍 ${location} | 🏢 ${branchName}</small>
                                 </div>
                                 <div style="text-align: right;">
-                                    <strong style="color: #28a745;">${machine.total_revenue || 0} xu</strong><br>
-                                    <small>Vào: ${machine.total_coins_in || 0} | Ra: ${machine.total_coins_out || 0}</small>
+                                    <strong style="color: ${revenue >= 0 ? '#28a745' : '#dc3545'};">${revenue > 0 ? '+' : ''}${revenue} xu</strong><br>
+                                    <small>Vào: ${coinsIn} | Ra: ${coinsOut}</small>
                                 </div>
                             </div>
                         `;
