@@ -1,1 +1,5 @@
 deploy-trigger-dashboard-fix-20250625_092222
+
+Deploy trigger: 2025-01-27 17:55:00
+iPhone layout optimization deployment
+Force CSS update for horizontal layout
