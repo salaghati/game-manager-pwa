@@ -892,6 +892,47 @@ class Database {
         }
     }
 
+    // Reset transactions data (for managers/admin)
+    async resetTransactions(branchId = null) {
+        if (this.isPostgres) {
+            let query = 'DELETE FROM transactions';
+            let params = [];
+            
+            if (branchId) {
+                query += ' WHERE branch_id = $1';
+                params.push(branchId);
+            }
+            
+            try {
+                const result = await this.pool.query(query, params);
+                return { deletedCount: result.rowCount };
+            } catch (error) {
+                console.error('Error resetting transactions (PostgreSQL):', error);
+                throw error;
+            }
+        } else {
+            // SQLite version
+            let query = 'DELETE FROM transactions';
+            let params = [];
+            
+            if (branchId) {
+                query += ' WHERE branch_id = ?';
+                params.push(branchId);
+            }
+            
+            return new Promise((resolve, reject) => {
+                this.db.run(query, params, function(err) {
+                    if (err) {
+                        console.error('Error resetting transactions (SQLite):', err);
+                        reject(err);
+                    } else {
+                        resolve({ deletedCount: this.changes });
+                    }
+                });
+            });
+        }
+    }
+
     close() {
         if (this.isPostgres) {
             this.pool.end();

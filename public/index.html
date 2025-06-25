@@ -410,7 +410,7 @@
             color: #1976d2 !important;
         }
 
-        /* Mobile responsive cho quick filters */
+                 /* Mobile responsive cho quick filters */
         @media (max-width: 768px) {
             .quick-filter-buttons {
                 grid-template-columns: repeat(2, 1fr) !important;
@@ -433,6 +433,23 @@
             
             .quick-filter-btn div:last-child {
                 font-size: 0.7em !important;
+            }
+
+            /* Action buttons responsive */
+            .action-buttons {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            .action-buttons > div {
+                flex: none !important;
+                width: 100% !important;
+                text-align: left !important;
+            }
+            
+            .action-buttons button {
+                width: 100% !important;
+                min-width: auto !important;
             }
         }
 
@@ -902,13 +919,30 @@
                     </div>
                 </div>
                 
-                <!-- Advanced Filters (Collapsed by default) -->
-                <div class="advanced-filters" style="margin-bottom: 20px;">
-                    <div style="margin-bottom: 10px;">
+                <!-- Action Buttons -->
+                <div class="action-buttons" style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <button type="button" class="btn" onclick="loadDashboard()" style="background: #667eea; flex: 1; min-width: 120px;">
+                        🔍 Cập Nhật Báo Cáo
+                    </button>
+                    <div id="export_section" style="display: none;">
+                        <button type="button" class="btn" onclick="exportCurrentData()" style="background: #28a745; min-width: 140px;">
+                            📄 Export Excel
+                        </button>
+                    </div>
+                    <div id="reset_section" style="display: none;">
+                        <button type="button" class="btn" onclick="resetData()" style="background: #dc3545; min-width: 120px;">
+                            🗑️ Reset Dữ Liệu
+                        </button>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
                         <button type="button" id="toggle-advanced" onclick="toggleAdvancedFilters()" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
                             🔧 Bộ Lọc Nâng Cao <span id="toggle-icon">▼</span>
                         </button>
                     </div>
+                </div>
+                
+                <!-- Advanced Filters (Collapsed by default) -->
+                <div class="advanced-filters" style="margin-bottom: 20px;">
                     <div id="advanced-filter-content" class="filters" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
                     <div class="form-group" id="dashboard_branch_selector" style="display: none;">
                         <label for="dashboard_branch_id">Chi Nhánh:</label>
@@ -926,15 +960,7 @@
                     </div>
                     <div class="form-group">
                         <label>&nbsp;</label>
-                        <button type="button" class="btn" onclick="loadDashboard()">🔍 Xem Báo Cáo</button>
-                    </div>
-                    <div class="form-group" id="export_section" style="display: none;">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn" onclick="exportCSV()" style="background: #28a745;">📄 Export Excel</button>
-                    </div>
-                    <div class="form-group" id="reset_section" style="display: none;">
-                        <label>&nbsp;</label>
-                        <button type="button" class="btn" onclick="resetData()" style="background: #dc3545;">🗑️ Reset Dữ Liệu</button>
+                        <button type="button" class="btn" onclick="loadDashboard()">🔍 Áp Dụng Bộ Lọc</button>
                     </div>
                     </div>
                 </div>
@@ -2109,17 +2135,42 @@
             }
         }
 
-        // Export CSV cho Excel
-        async function exportCSV() {
+        // Export current filtered data to Excel
+        async function exportCurrentData() {
             try {
+                // Get current filter values
                 const startDate = document.getElementById('start_date').value;
                 const endDate = document.getElementById('end_date').value;
                 const branchId = document.getElementById('dashboard_branch_id')?.value;
+                
+                // Determine period for filename
+                let periodName = '';
+                const activeQuickFilter = document.querySelector('.quick-filter-btn.active');
+                if (activeQuickFilter) {
+                    const period = activeQuickFilter.dataset.period;
+                    switch(period) {
+                        case 'today': periodName = 'hom-nay'; break;
+                        case 'yesterday': periodName = 'hom-qua'; break;
+                        case 'week': periodName = '7-ngay-qua'; break;
+                        case 'month': periodName = 'thang-nay'; break;
+                        default: periodName = `${startDate}-${endDate}`;
+                    }
+                } else {
+                    periodName = `${startDate}-${endDate}`;
+                }
+                
+                // Show loading state
+                const exportBtn = document.querySelector('#export_section button');
+                const originalText = exportBtn.innerHTML;
+                exportBtn.innerHTML = '⏳ Đang xuất...';
+                exportBtn.disabled = true;
                 
                 const url = new URL(`${window.location.origin}/api/export/csv`);
                 if (startDate) url.searchParams.append('start_date', startDate);
                 if (endDate) url.searchParams.append('end_date', endDate);
                 if (branchId) url.searchParams.append('branch_id', branchId);
+
+                console.log('📄 Export URL:', url.toString());
 
                 const response = await fetch(url, {
                     credentials: 'include'
@@ -2135,7 +2186,7 @@
                     // Tạo link download và click
                     const a = document.createElement('a');
                     a.href = downloadUrl;
-                    a.download = `doanh-thu-${new Date().toISOString().split('T')[0]}.csv`;
+                    a.download = `doanh-thu-${periodName}-${new Date().toISOString().split('T')[0]}.csv`;
                     document.body.appendChild(a);
                     a.click();
                     
@@ -2143,7 +2194,7 @@
                     window.URL.revokeObjectURL(downloadUrl);
                     document.body.removeChild(a);
                     
-                    showAlert('✅ Xuất file Excel thành công!');
+                    showAlert(`✅ Xuất file Excel thành công! Khoảng thời gian: ${startDate} đến ${endDate}`);
                 } else {
                     const error = await response.json();
                     showAlert(error.error || 'Lỗi khi xuất file', 'error');
@@ -2151,6 +2202,11 @@
             } catch (error) {
                 console.error('Error exporting CSV:', error);
                 showAlert('Lỗi khi xuất file Excel', 'error');
+            } finally {
+                // Restore button state
+                const exportBtn = document.querySelector('#export_section button');
+                exportBtn.innerHTML = '📄 Export Excel';
+                exportBtn.disabled = false;
             }
         }
 

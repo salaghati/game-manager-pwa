@@ -362,6 +362,111 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
     }
 });
 
+// Export CSV endpoint
+app.get('/api/export/csv', requireManagerOrAdmin, async (req, res) => {
+    try {
+        const { branch_id, start_date, end_date } = req.query;
+        const user = req.session.user;
+        
+        let branchId = null;
+        if (user.role === 'manager') {
+            branchId = user.branch_id;
+        } else if (branch_id) {
+            branchId = parseInt(branch_id);
+        }
+        
+        // Get detailed transactions for export
+        const transactions = await db.getTransactions(
+            branchId, 
+            null, // all machines
+            null, // all users
+            start_date, 
+            end_date, 
+            'date_desc', 
+            1000 // high limit for export
+        );
+
+        // Convert to CSV format
+        const csvHeader = [
+            'Ngày Giao Dịch',
+            'Ngày Nhập',
+            'Máy',
+            'Vị Trí',
+            'Chi Nhánh',
+            'Nhân Viên',
+            'Xu Vào',
+            'Xu Ra',
+            'Doanh Thu',
+            'Ghi Chú',
+            'Trạng Thái'
+        ].join(',');
+
+        const csvRows = transactions.transactions ? transactions.transactions.map(t => {
+            const createdDate = new Date(t.created_at).toLocaleDateString('vi-VN');
+            const transactionDate = new Date(t.transaction_date).toLocaleDateString('vi-VN');
+            const isLate = new Date(t.created_at).toISOString().split('T')[0] > t.transaction_date;
+            
+            return [
+                `"${transactionDate}"`,
+                `"${createdDate}"`,
+                `"${t.machine_name || 'N/A'}"`,
+                `"${t.location || 'N/A'}"`,
+                `"${t.branch_name || 'N/A'}"`,
+                `"${t.user_name || 'N/A'}"`,
+                t.coins_in || 0,
+                t.coins_out || 0,
+                t.revenue || 0,
+                `"${(t.note || '').replace(/"/g, '""')}"`,
+                `"${isLate ? 'Nhập muộn' : 'Đúng giờ'}"`
+            ].join(',');
+        }) : [];
+
+        const csvContent = [csvHeader, ...csvRows].join('\n');
+
+        // Set headers for file download
+        const filename = `doanh-thu-${start_date || 'all'}-${end_date || 'all'}.csv`;
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        
+        // Add BOM for Excel UTF-8 support
+        res.send('\ufeff' + csvContent);
+        
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        res.status(500).json({ error: 'Lỗi khi xuất file CSV' });
+    }
+});
+
+// Reset data endpoint (for managers)
+app.post('/api/reset-data', requireManagerOrAdmin, async (req, res) => {
+    try {
+        const user = req.session.user;
+        
+        let branchId = null;
+        if (user.role === 'manager') {
+            branchId = user.branch_id;
+        }
+        
+        // Only allow reset for specific branch if manager
+        if (user.role === 'manager' && !branchId) {
+            return res.status(403).json({ error: 'Manager cần có chi nhánh để reset dữ liệu' });
+        }
+        
+        // For safety, we'll only reset transactions, not machines/users
+        const result = await db.resetTransactions(branchId);
+        
+        res.json({ 
+            success: true, 
+            message: user.role === 'manager' 
+                ? `Đã xóa tất cả giao dịch của chi nhánh ${user.branch_name}`
+                : 'Đã xóa tất cả giao dịch của hệ thống'
+        });
+    } catch (error) {
+        console.error('Error resetting data:', error);
+        res.status(500).json({ error: 'Lỗi khi reset dữ liệu' });
+    }
+});
+
 // Xử lý lỗi 404
 app.use((req, res) => {
     res.status(404).json({ error: 'API endpoint không tồn tại' });
