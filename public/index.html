@@ -1831,27 +1831,17 @@
                 const branchId = document.getElementById('dashboard_branch_id')?.value;
                 
                 // Debug dashboard params
-                console.log('🔍 loadDashboard DEBUG:');
-                console.log('Dashboard params:', { startDate, endDate, branchId });
-                console.log('Current User:', currentUser);
-                console.log('🔍 Period being queried:', startDate === endDate ? `Single day: ${startDate}` : `Range: ${startDate} to ${endDate}`);
-                
                 const url = new URL(`${window.location.origin}/api/dashboard`);
                 if (startDate) url.searchParams.append('start_date', startDate);
                 if (endDate) url.searchParams.append('end_date', endDate);
                 if (branchId) url.searchParams.append('branch_id', branchId);
-
-                console.log('🌐 Dashboard API URL:', url.toString());
 
                 const response = await fetch(url, {
                     credentials: 'include'
                 });
                 const data = await response.json();
                 
-                console.log('📦 Dashboard API Response:', data);
-                console.log('📦 Dashboard machines array:', data.machines);
-                console.log('📦 Dashboard machines type:', typeof data.machines);
-                console.log('📦 Dashboard machines length:', data.machines?.length);
+
 
                 // Hiển thị stats tổng quan
                 const statsGrid = document.getElementById('stats-grid');
@@ -1902,10 +1892,8 @@
                 
                 // Fix: đảm bảo data.machines là array
                 const machinesArray = Array.isArray(data.machines) ? data.machines : [];
-                console.log('🎮 Machines array after fix:', machinesArray);
                 
                 if (machinesArray && machinesArray.length > 0) {
-                    console.log('🎮 Machine data from API:', machinesArray);
                     
                     // Store dashboard machines để so sánh với recent transactions
                     window.lastDashboardMachines = machinesArray;
@@ -1914,7 +1902,6 @@
                     const sortedMachines = machinesArray.sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0));
                     
                     sortedMachines.forEach((machine, index) => {
-                        console.log(`🎮 Machine ${index}:`, machine);
                         const machineName = machine.machine_name || machine.name || 'Máy không xác định';
                         const location = machine.location || 'Vị trí không xác định';
                         const branchName = machine.branch_name || 'Chi nhánh không xác định';
@@ -2064,40 +2051,23 @@
         // Load giao dịch gần đây cho Dashboard (Manager/Admin)
         async function loadRecentTransactionsForDashboard(startDate, endDate, branchId) {
             try {
-                console.log('🔍 loadRecentTransactionsForDashboard DEBUG:');
-                console.log('Recent transactions params:', { startDate, endDate, branchId });
-                
                 const url = new URL(`${window.location.origin}/api/transactions`);
                 if (startDate) url.searchParams.append('start_date', startDate);
                 if (endDate) url.searchParams.append('end_date', endDate);
                 if (branchId) url.searchParams.append('branch_id', branchId);
                 url.searchParams.append('limit', '10'); // Chỉ lấy 10 giao dịch gần nhất
                 url.searchParams.append('sort_by', 'date_desc');
-                
-                console.log('🌐 Recent Transactions API URL:', url.toString());
 
                 const response = await fetch(url, {
                     credentials: 'include'
                 });
                 const data = await response.json();
-                
-                console.log('📦 Recent Transactions API Response:', data);
-                
                 const transactions = data.transactions || data;
-                console.log('📦 Recent Transactions Array:', transactions);
-                console.log('📦 Recent Transactions Count:', transactions?.length);
                 
-                // So sánh machine data giữa dashboard và recent transactions
-                console.log('🔍 COMPARISON ANALYSIS:');
-                console.log('🔍 window.lastDashboardMachines:', window.lastDashboardMachines);
-                console.log('🔍 transactions length:', transactions?.length);
-                console.log('🔍 Condition check:', window.lastDashboardMachines && transactions?.length > 0);
+                // So sánh machine data để debug inconsistency (development only)
                 if (window.lastDashboardMachines && transactions?.length > 0) {
                     const dashboardMachineIds = window.lastDashboardMachines.map(m => m.machine_id || m.id);
                     const recentTransactionMachineIds = [...new Set(transactions.map(t => t.machine_id))];
-                    
-                    console.log('🎮 Dashboard machine IDs:', dashboardMachineIds);
-                    console.log('📋 Recent transaction machine IDs:', recentTransactionMachineIds);
                     
                     const missingFromDashboard = recentTransactionMachineIds.filter(id => !dashboardMachineIds.includes(id));
                     const missingFromRecent = dashboardMachineIds.filter(id => !recentTransactionMachineIds.includes(id));
