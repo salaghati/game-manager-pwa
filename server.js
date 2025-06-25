@@ -305,7 +305,8 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
         }
         
         console.log('🔍 Dashboard API - Testing Database Calls');
-        console.log('User:', user.username, 'Branch:', branchId);
+        console.log('User:', user.username, 'Role:', user.role, 'Branch:', branchId);
+        console.log('🗓️ Date filters:', { start_date, end_date });
         
         let branchRevenue, machineRevenue;
         
@@ -330,11 +331,16 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
         
         try {
             console.log('🎮 Getting machine revenue with date filter...');
+            console.log('🎮 Calling getRevenue with params:', { branchId, machineId: null, start_date, end_date });
             machineRevenue = await db.getRevenue(branchId, null, start_date, end_date);
             console.log('✅ getRevenue success:', machineRevenue);
             console.log('✅ getRevenue type:', typeof machineRevenue);
             console.log('✅ getRevenue isArray:', Array.isArray(machineRevenue));
             console.log('✅ getRevenue length:', machineRevenue?.length);
+            
+            if (machineRevenue && machineRevenue.length > 0) {
+                console.log('🎮 First machine in result:', machineRevenue[0]);
+            }
             
             // If no data returned, use empty array instead of fallback data
             if (!machineRevenue || machineRevenue.length === 0) {
@@ -372,6 +378,26 @@ app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error getting dashboard data:', error);
         res.status(500).json({ error: 'Lỗi khi lấy dữ liệu dashboard' });
+    }
+});
+
+// Debug endpoint - get all machines without filters
+app.get('/api/debug/machines', requireManagerOrAdmin, async (req, res) => {
+    try {
+        const allMachines = await db.getRevenue(null, null, null, null); // No filters
+        const allTransactions = await db.getTransactions(null, null, null, null, null, 'date_desc', 10);
+        
+        res.json({
+            machines: allMachines,
+            recent_transactions: allTransactions.transactions || allTransactions,
+            debug_info: {
+                machines_count: allMachines?.length || 0,
+                transactions_count: allTransactions.transactions?.length || allTransactions?.length || 0
+            }
+        });
+    } catch (error) {
+        console.error('Error in debug endpoint:', error);
+        res.status(500).json({ error: 'Debug failed', details: error.message });
     }
 });
 

@@ -447,8 +447,15 @@ class Database {
 
             query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
 
+            console.log('🔍 PostgreSQL getRevenue query:', query);
+            console.log('🔍 Query params:', params);
+
             try {
                 const result = await this.pool.query(query, params);
+                console.log('🔍 Query result count:', result.rows.length);
+                if (result.rows.length > 0) {
+                    console.log('🔍 First result row:', result.rows[0]);
+                }
                 return result.rows;
             } catch (error) {
                 console.error('Error in getRevenue (PostgreSQL):', error);
@@ -507,12 +514,19 @@ class Database {
 
             query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
 
+            console.log('🔍 SQLite getRevenue query:', query);
+            console.log('🔍 Query params:', params);
+
             return new Promise((resolve, reject) => {
                 this.db.all(query, params, (err, rows) => {
                     if (err) {
                         console.error('Error in getRevenue (SQLite):', err);
                         reject(err);
                     } else {
+                        console.log('🔍 Query result count:', rows.length);
+                        if (rows.length > 0) {
+                            console.log('🔍 First result row:', rows[0]);
+                        }
                         resolve(rows);
                     }
                 });
