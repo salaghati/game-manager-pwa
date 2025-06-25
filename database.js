@@ -445,7 +445,7 @@ class Database {
                 query += " WHERE " + allConditions.join(" AND ");
             }
 
-            query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
+            query += " GROUP BY m.id, b.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
 
             console.log('🔍 PostgreSQL getRevenue query:', query);
             console.log('🔍 Query params:', params);
@@ -512,7 +512,7 @@ class Database {
                 query += " WHERE " + allConditions.join(" AND ");
             }
 
-            query += " GROUP BY m.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
+            query += " GROUP BY m.id, b.id, b.name, m.name, m.location, m.branch_id ORDER BY b.id, m.id";
 
             console.log('🔍 SQLite getRevenue query:', query);
             console.log('🔍 Query params:', params);
