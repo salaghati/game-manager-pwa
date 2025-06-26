@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Game Manager - Quản Lý Máy Chơi Game</title>
     
+    <!-- Cache busting cho iPhone -->
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta name="version" content="v10-fixed">
+    
     <!-- PWA Meta Tags cho iPhone -->
     <meta name="theme-color" content="#667eea">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -70,8 +75,26 @@
             border-radius: 8px;
             max-height: 200px;
             overflow-y: auto;
-            z-index: 1000;
+            z-index: 9999;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* iPhone dropdown fix */
+        @media (max-width: 428px) {
+            .machine-dropdown {
+                position: fixed !important;
+                top: 20% !important;
+                left: 10px !important;
+                right: 10px !important;
+                max-height: 50vh !important;
+                z-index: 10000 !important;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+            }
+            
+            .machine-option {
+                padding: 15px !important;
+                font-size: 16px !important;
+            }
         }
 
         .machine-option {
