@@ -2641,17 +2641,18 @@
                 margin-right: 12px !important;
             }
             
-            /* Machine/Branch name - compact */
+            /* Machine/Branch name - nổi bật hơn */
             .machine-item strong, .branch-item strong {
-                font-size: 13px !important;
-                font-weight: 700 !important;
+                font-size: 14px !important;
+                font-weight: 800 !important;
                 margin-bottom: 2px !important;
                 line-height: 1.1 !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
                 white-space: nowrap !important;
                 display: block !important;
-                color: #333 !important;
+                color: #1f2937 !important;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
             }
             
             /* Location/details - compact */
@@ -2666,29 +2667,31 @@
                 display: block !important;
             }
             
-            /* Revenue section - phần phải */
+            /* Revenue section - nổi bật và dễ nhìn */
             .machine-item > div:last-child, 
             .branch-item > div:last-child,
             .revenue-stats {
                 flex-shrink: 0 !important;
                 text-align: right !important;
-                min-width: 80px !important;
-                padding: 6px 8px !important;
-                background: rgba(102, 126, 234, 0.05) !important;
-                border-radius: 6px !important;
-                border: 1px solid rgba(102, 126, 234, 0.1) !important;
+                min-width: 85px !important;
+                padding: 8px 10px !important;
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+                border-radius: 8px !important;
+                border: 2px solid #0284c7 !important;
+                box-shadow: 0 2px 4px rgba(2, 132, 199, 0.1) !important;
             }
             
-            /* Revenue amount - nổi bật */
+            /* Revenue amount - nổi bật và dễ nhìn */
             .revenue-amount, 
             .machine-item .revenue-stats strong,
             .branch-item .revenue-stats strong {
-                font-size: 15px !important;
-                font-weight: 700 !important;
-                color: #2d5a27 !important;
+                font-size: 16px !important;
+                font-weight: 800 !important;
+                color: #059669 !important;
                 margin-bottom: 2px !important;
                 line-height: 1 !important;
                 display: block !important;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
             }
             
             /* Revenue details - nhỏ hơn */
@@ -2753,22 +2756,41 @@
                 font-weight: 500 !important;
             }
             
-            /* Color indicators for different stats */
+            /* Enhanced color indicators - dễ nhìn hơn */
             .stat-card:nth-child(1) { 
-                border-left: 4px solid #10b981 !important; 
-                background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%) !important;
+                border-left: 6px solid #059669 !important; 
+                background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+                color: #065f46 !important;
             }
             .stat-card:nth-child(2) { 
-                border-left: 4px solid #3b82f6 !important; 
-                background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%) !important;
+                border-left: 6px solid #2563eb !important; 
+                background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%) !important;
+                color: #1e3a8a !important;
             }
             .stat-card:nth-child(3) { 
-                border-left: 4px solid #ef4444 !important; 
-                background: linear-gradient(135deg, #fef2f2 0%, #fef7f7 100%) !important;
+                border-left: 6px solid #dc2626 !important; 
+                background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%) !important;
+                color: #991b1b !important;
             }
             .stat-card:nth-child(4) { 
-                border-left: 4px solid #8b5cf6 !important; 
-                background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%) !important;
+                border-left: 6px solid #7c3aed !important; 
+                background: linear-gradient(135deg, #e4d4f4 0%, #c4b5fd 100%) !important;
+                color: #5b21b6 !important;
+            }
+            
+            /* Enhanced stat values - đậm hơn */
+            .stat-card .stat-value {
+                font-size: 20px !important;
+                font-weight: 900 !important;
+                margin-bottom: 4px !important;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+            }
+            
+            .stat-card .stat-label {
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+                font-weight: 600 !important;
+                opacity: 0.8 !important;
             }
         }
         
