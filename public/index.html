@@ -2601,21 +2601,35 @@
                 margin: 0 !important;
             }
             
-            /* Horizontal machine/branch items - Info trái, Revenue phải */
+            /* Enhanced machine/branch items - Info trái, Revenue phải */
             .machine-item, .branch-item {
                 display: flex !important;
                 flex-direction: row !important;
                 justify-content: space-between !important;
                 align-items: center !important;
-                padding: 8px 12px !important;
-                margin-bottom: 6px !important;
-                min-height: 60px !important;
+                padding: 12px 14px !important;
+                margin-bottom: 8px !important;
+                min-height: 65px !important;
                 font-size: 12px !important;
-                background: white !important;
-                border-radius: 8px !important;
-                border-left: 3px solid #667eea !important;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+                background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%) !important;
+                border-radius: 12px !important;
+                border-left: 4px solid #667eea !important;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.08) !important;
                 overflow: hidden !important;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                position: relative !important;
+            }
+            
+            /* Touch interactions */
+            .machine-item:active, .branch-item:active {
+                transform: scale(0.98) !important;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.12) !important;
+            }
+            
+            /* Hover effects for responsive feedback */
+            .machine-item:hover, .branch-item:hover {
+                box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+                transform: translateY(-1px) !important;
             }
             
             /* Info section - phần trái */
@@ -2696,33 +2710,140 @@
                 margin-top: 1px !important;
             }
             
-            /* Compact stats cards ở đầu */
+            /* Enhanced compact stats cards */
             .summary-stats {
                 display: grid !important;
                 grid-template-columns: repeat(4, 1fr) !important;
-                gap: 6px !important;
-                margin-bottom: 12px !important;
+                gap: 8px !important;
+                margin-bottom: 16px !important;
+                padding: 0 4px !important;
             }
             
             .stat-card {
-                padding: 8px 4px !important;
+                padding: 12px 6px !important;
                 font-size: 10px !important;
                 text-align: center !important;
-                min-height: 50px !important;
+                min-height: 65px !important;
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+                border-radius: 12px !important;
+                border: 1px solid #e2e8f0 !important;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.08) !important;
+                transition: all 0.2s ease !important;
+                position: relative !important;
+                overflow: hidden !important;
             }
             
+            .stat-card:active {
+                transform: scale(0.95) !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.12) !important;
+            }
+            
+            /* Enhanced stat values */
             .stat-card .stat-value {
-                font-size: 16px !important;
-                font-weight: 700 !important;
-                margin-bottom: 2px !important;
+                font-size: 18px !important;
+                font-weight: 800 !important;
+                margin-bottom: 4px !important;
+                color: #1f2937 !important;
             }
             
             .stat-card .stat-label {
-                font-size: 8px !important;
-                line-height: 1.1 !important;
+                font-size: 9px !important;
+                line-height: 1.2 !important;
+                color: #6b7280 !important;
+                font-weight: 500 !important;
+            }
+            
+            /* Color indicators for different stats */
+            .stat-card:nth-child(1) { 
+                border-left: 4px solid #10b981 !important; 
+                background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%) !important;
+            }
+            .stat-card:nth-child(2) { 
+                border-left: 4px solid #3b82f6 !important; 
+                background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%) !important;
+            }
+            .stat-card:nth-child(3) { 
+                border-left: 4px solid #ef4444 !important; 
+                background: linear-gradient(135deg, #fef2f2 0%, #fef7f7 100%) !important;
+            }
+            .stat-card:nth-child(4) { 
+                border-left: 4px solid #8b5cf6 !important; 
+                background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%) !important;
             }
         }
         
+        /* Enhanced Buttons & Animations */
+        .enhanced-btn {
+            position: relative !important;
+            overflow: hidden !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .enhanced-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .enhanced-btn:active {
+            transform: translateY(0) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        /* Ripple effect */
+        .enhanced-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        
+        .enhanced-btn:active::before {
+            width: 100px;
+            height: 100px;
+        }
+        
+        /* Button variants */
+        .primary-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+        
+        .success-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+        }
+        
+        .danger-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%) !important;
+        }
+        
+        /* Quick filter enhancements */
+        .quick-filter-btn {
+            transition: all 0.3s ease !important;
+            border: 2px solid #e9ecef !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+        }
+        
+        .quick-filter-btn:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+            border-color: #667eea !important;
+        }
+        
+        .quick-filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border-color: #667eea !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+        }
+
         /* Laptop/Desktop - Giữ nguyên layout dọc */
         @media only screen and (min-width: 769px) {
             .machine-item, .branch-item {
@@ -2858,11 +2979,11 @@
                 
                 <!-- Action Buttons -->
                 <div class="action-buttons" style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                    <button type="button" class="btn" onclick="loadDashboard()" style="background: #667eea; flex: 1; min-width: 120px;">
+                    <button type="button" class="btn enhanced-btn primary-btn" onclick="loadDashboard()" style="background: #667eea; flex: 1; min-width: 120px;">
                         🔍 Cập Nhật Báo Cáo
                     </button>
                     <div id="export_section" style="display: none;">
-                        <button type="button" class="btn" onclick="exportCurrentData()" style="background: #28a745; min-width: 140px;">
+                        <button type="button" class="btn enhanced-btn success-btn" onclick="exportCurrentData()" style="background: #28a745; min-width: 140px;">
                             📄 Export Excel
                         </button>
                     </div>
@@ -2999,7 +3120,7 @@
         // Global user data
         let currentUser = null;
 
-        // Initialize app and iPhone optimizations
+        // Initialize app and iPhone optimizations with enhanced UX
         document.addEventListener('DOMContentLoaded', function() {
             checkAuth();
             setDefaultDates();
@@ -3010,6 +3131,73 @@
                     .then(reg => console.log('Service Worker registered'))
                     .catch(err => console.log('Service Worker registration failed'));
             }
+            
+            // Enhanced touch interactions
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.closest('.enhanced-btn, .machine-item, .branch-item, .stat-card, .quick-filter-btn')) {
+                    // Haptic feedback for iOS
+                    if (navigator.vibrate) {
+                        navigator.vibrate(10);
+                    }
+                    // Web API haptic feedback
+                    if (window.navigator && window.navigator.vibrate) {
+                        window.navigator.vibrate([10]);
+                    }
+                }
+            });
+            
+            // Add stagger animation for machine items
+            function addStaggerAnimation() {
+                const items = document.querySelectorAll('.machine-item, .branch-item');
+                items.forEach((item, index) => {
+                    item.style.animationDelay = `${index * 0.1}s`;
+                    item.style.animation = 'slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                });
+            }
+            
+            // CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .machine-item, .branch-item {
+                    opacity: 0;
+                }
+                
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+                
+                .stat-card:hover {
+                    animation: pulse 0.6s ease-in-out;
+                }
+                
+                @keyframes bounceIn {
+                    0% { opacity: 0; transform: scale(0.3); }
+                    50% { opacity: 1; transform: scale(1.05); }
+                    70% { transform: scale(0.9); }
+                    100% { transform: scale(1); }
+                }
+                
+                .stat-card {
+                    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Trigger stagger animation when content loads
+            setTimeout(addStaggerAnimation, 500);
             
             // Auto-load dashboard data with last 7 days
             const today = new Date();
