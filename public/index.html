@@ -2590,49 +2590,46 @@
             }
         }
         
-        /* iPhone Grid Layout Override - Chỉ áp dụng cho iPhone */
+        /* iPhone Horizontal Layout - Chỉ áp dụng cho iPhone */
         @media only screen and (max-width: 428px) and (-webkit-min-device-pixel-ratio: 2) {
-            /* Force grid layout cho machines/branches list */
+            /* List container - không grid */
             .machines-list, .branches-list, 
             #machine_tab .tab-content > div,
             #branch_tab .tab-content > div {
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                gap: 8px !important;
+                display: block !important;
                 padding: 0 !important;
                 margin: 0 !important;
             }
             
-            /* Compact machine/branch items */
+            /* Horizontal machine/branch items - Info trái, Revenue phải */
             .machine-item, .branch-item {
                 display: flex !important;
-                flex-direction: column !important;
+                flex-direction: row !important;
                 justify-content: space-between !important;
-                align-items: stretch !important;
-                padding: 8px !important;
-                margin: 0 !important;
-                min-height: 90px !important;
-                max-height: 120px !important;
-                font-size: 11px !important;
+                align-items: center !important;
+                padding: 8px 12px !important;
+                margin-bottom: 6px !important;
+                min-height: 60px !important;
+                font-size: 12px !important;
                 background: white !important;
                 border-radius: 8px !important;
                 border-left: 3px solid #667eea !important;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
                 overflow: hidden !important;
-                position: relative !important;
             }
             
-            /* Info section - phần trên */
+            /* Info section - phần trái */
             .machine-item > div:first-child, 
             .branch-item > div:first-child {
                 flex: 1 !important;
-                margin-bottom: 6px !important;
+                min-width: 0 !important;
                 overflow: hidden !important;
+                margin-right: 12px !important;
             }
             
-            /* Machine/Branch name */
+            /* Machine/Branch name - compact */
             .machine-item strong, .branch-item strong {
-                font-size: 12px !important;
+                font-size: 13px !important;
                 font-weight: 700 !important;
                 margin-bottom: 2px !important;
                 line-height: 1.1 !important;
@@ -2640,11 +2637,12 @@
                 text-overflow: ellipsis !important;
                 white-space: nowrap !important;
                 display: block !important;
+                color: #333 !important;
             }
             
-            /* Location/details */
+            /* Location/details - compact */
             .machine-item small, .branch-item small {
-                font-size: 9px !important;
+                font-size: 10px !important;
                 color: #666 !important;
                 line-height: 1.2 !important;
                 overflow: hidden !important;
@@ -2654,45 +2652,74 @@
                 display: block !important;
             }
             
-            /* Revenue section - phần dưới */
+            /* Revenue section - phần phải */
             .machine-item > div:last-child, 
             .branch-item > div:last-child,
             .revenue-stats {
-                margin-top: auto !important;
-                text-align: center !important;
-                padding: 4px 0 !important;
-                border-top: 1px solid #f0f0f0 !important;
+                flex-shrink: 0 !important;
+                text-align: right !important;
+                min-width: 80px !important;
+                padding: 6px 8px !important;
                 background: rgba(102, 126, 234, 0.05) !important;
+                border-radius: 6px !important;
+                border: 1px solid rgba(102, 126, 234, 0.1) !important;
             }
             
-            /* Revenue amount */
+            /* Revenue amount - nổi bật */
             .revenue-amount, 
             .machine-item .revenue-stats strong,
             .branch-item .revenue-stats strong {
-                font-size: 13px !important;
+                font-size: 15px !important;
                 font-weight: 700 !important;
                 color: #2d5a27 !important;
-                margin-bottom: 1px !important;
+                margin-bottom: 2px !important;
                 line-height: 1 !important;
+                display: block !important;
             }
             
-            /* Revenue details */
+            /* Revenue details - nhỏ hơn */
             .revenue-details,
             .machine-item .revenue-stats small,
             .branch-item .revenue-stats small {
-                font-size: 8px !important;
+                font-size: 9px !important;
                 color: #666 !important;
-                line-height: 1 !important;
+                line-height: 1.1 !important;
+                display: block !important;
             }
             
-            /* Win rate badge */
-            .machine-item::after {
-                content: "📈" !important;
-                position: absolute !important;
-                top: 4px !important;
-                right: 4px !important;
+            /* Win rate percentage - nếu có */
+            .machine-item .win-rate,
+            .branch-item .win-rate {
+                font-size: 8px !important;
+                color: #28a745 !important;
+                font-weight: 600 !important;
+                margin-top: 1px !important;
+            }
+            
+            /* Compact stats cards ở đầu */
+            .summary-stats {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 6px !important;
+                margin-bottom: 12px !important;
+            }
+            
+            .stat-card {
+                padding: 8px 4px !important;
                 font-size: 10px !important;
-                opacity: 0.7 !important;
+                text-align: center !important;
+                min-height: 50px !important;
+            }
+            
+            .stat-card .stat-value {
+                font-size: 16px !important;
+                font-weight: 700 !important;
+                margin-bottom: 2px !important;
+            }
+            
+            .stat-card .stat-label {
+                font-size: 8px !important;
+                line-height: 1.1 !important;
             }
         }
         
@@ -3025,55 +3052,52 @@
             forceMobileLayout();
             setInterval(forceMobileLayout, 1000); // Check every 1 second
             
-            // Additional force for machine items with grid layout
+            // Additional force for horizontal layout
             function superForceMobileLayout() {
                 if (window.innerWidth <= 428) {
-                    // Force grid layout cho container
+                    // Force block layout cho container (không grid)
                     const containers = document.querySelectorAll('.machines-list, .branches-list, #machine_tab .tab-content > div, #branch_tab .tab-content > div');
                     containers.forEach(container => {
                         container.setAttribute('style', `
-                            display: grid !important;
-                            grid-template-columns: 1fr 1fr !important;
-                            gap: 8px !important;
+                            display: block !important;
                             padding: 0 !important;
                             margin: 0 !important;
                         `);
                     });
                     
-                    // Force compact items
+                    // Force horizontal items - Info trái, Revenue phải
                     const machineItems = document.querySelectorAll('.machine-item, .branch-item');
                     machineItems.forEach(item => {
                         item.setAttribute('style', `
                             display: flex !important;
-                            flex-direction: column !important;
+                            flex-direction: row !important;
                             justify-content: space-between !important;
-                            align-items: stretch !important;
-                            padding: 8px !important;
-                            margin: 0 !important;
-                            min-height: 90px !important;
-                            max-height: 120px !important;
-                            font-size: 11px !important;
+                            align-items: center !important;
+                            padding: 8px 12px !important;
+                            margin-bottom: 6px !important;
+                            min-height: 60px !important;
+                            font-size: 12px !important;
                             background: white !important;
                             border-radius: 8px !important;
                             border-left: 3px solid #667eea !important;
                             box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
                             overflow: hidden !important;
-                            position: relative !important;
                         `);
                         
-                        // Force first div (info section)
+                        // Force first div (info section - bên trái)
                         const firstDiv = item.querySelector('div:first-child');
                         if (firstDiv) {
                             firstDiv.setAttribute('style', `
                                 flex: 1 !important;
-                                margin-bottom: 6px !important;
+                                min-width: 0 !important;
                                 overflow: hidden !important;
+                                margin-right: 12px !important;
                             `);
                             
                             // Fix text layout in first div
                             const strongs = firstDiv.querySelectorAll('strong');
                             strongs.forEach(strong => {
-                                strong.style.fontSize = '12px';
+                                strong.style.fontSize = '13px';
                                 strong.style.fontWeight = '700';
                                 strong.style.display = 'block';
                                 strong.style.marginBottom = '2px';
@@ -3081,11 +3105,12 @@
                                 strong.style.overflow = 'hidden';
                                 strong.style.textOverflow = 'ellipsis';
                                 strong.style.whiteSpace = 'nowrap';
+                                strong.style.color = '#333';
                             });
                             
                             const smalls = firstDiv.querySelectorAll('small');
                             smalls.forEach(small => {
-                                small.style.fontSize = '9px';
+                                small.style.fontSize = '10px';
                                 small.style.color = '#666';
                                 small.style.display = 'block';
                                 small.style.marginBottom = '1px';
@@ -3096,33 +3121,37 @@
                             });
                         }
                         
-                        // Force last div (revenue section)  
+                        // Force last div (revenue section - bên phải)  
                         const lastDiv = item.querySelector('div:last-child, .revenue-stats');
                         if (lastDiv) {
                             lastDiv.setAttribute('style', `
-                                margin-top: auto !important;
-                                text-align: center !important;
-                                padding: 4px 0 !important;
-                                border-top: 1px solid #f0f0f0 !important;
+                                flex-shrink: 0 !important;
+                                text-align: right !important;
+                                min-width: 80px !important;
+                                padding: 6px 8px !important;
                                 background: rgba(102, 126, 234, 0.05) !important;
+                                border-radius: 6px !important;
+                                border: 1px solid rgba(102, 126, 234, 0.1) !important;
                             `);
                             
-                            // Style revenue amounts
+                            // Style revenue amounts - nổi bật
                             const revenueAmounts = lastDiv.querySelectorAll('.revenue-amount, strong');
                             revenueAmounts.forEach(amount => {
-                                amount.style.fontSize = '13px';
+                                amount.style.fontSize = '15px';
                                 amount.style.fontWeight = '700';
                                 amount.style.lineHeight = '1';
-                                amount.style.marginBottom = '1px';
+                                amount.style.marginBottom = '2px';
                                 amount.style.color = '#2d5a27';
+                                amount.style.display = 'block';
                             });
                             
-                            // Style revenue details
+                            // Style revenue details - nhỏ hơn
                             const revenueDetails = lastDiv.querySelectorAll('.revenue-details, small');
                             revenueDetails.forEach(detail => {
-                                detail.style.fontSize = '8px';
+                                detail.style.fontSize = '9px';
                                 detail.style.color = '#666';
-                                detail.style.lineHeight = '1';
+                                detail.style.lineHeight = '1.1';
+                                detail.style.display = 'block';
                             });
                         }
                     });
