@@ -2604,20 +2604,20 @@
                 margin: 0 !important;
             }
             
-            /* Enhanced machine/branch items - Info trái, Revenue phải */
+            /* Enhanced machine items - clear display */
             .machine-item, .branch-item {
                 display: flex !important;
                 flex-direction: row !important;
                 justify-content: space-between !important;
-                align-items: center !important;
-                padding: 12px 14px !important;
-                margin-bottom: 8px !important;
-                min-height: 65px !important;
+                align-items: flex-start !important;
+                padding: 15px 16px !important;
+                margin-bottom: 10px !important;
+                min-height: 75px !important;
                 font-size: 12px !important;
                 background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%) !important;
                 border-radius: 12px !important;
                 border-left: 4px solid #667eea !important;
-                box-shadow: 0 3px 10px rgba(0,0,0,0.08) !important;
+                box-shadow: 0 3px 12px rgba(0,0,0,0.1) !important;
                 overflow: visible !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 position: relative !important;
@@ -4226,27 +4226,40 @@
                         const coinsOut = machine.total_coins_out || 0;
                         const transactionCount = machine.transaction_count || 0;
                         
+                        // DEBUG: Log machine info
+                        console.log(`Machine ${index}:`, {
+                            name: machineName,
+                            location: location,
+                            branch: branchName,
+                            revenue: revenue,
+                            transactions: transactionCount
+                        });
+                        
                         // Tính tỷ lệ thắng/thua cho máy
                         const winRate = coinsIn > 0 ? ((revenue / coinsIn) * 100).toFixed(1) : '0.0';
                         const revenueClass = revenue > 0 ? '#28a745' : revenue < 0 ? '#dc3545' : '#6c757d';
                         const revenueIcon = revenue > 0 ? '📈' : revenue < 0 ? '📉' : '➖';
                         
                         revenueHtml += `
-                            <div class="machine-item" style="margin-bottom: 8px;">
-                                <div>
-                                    <strong>${machineName}</strong>
-                                    <small>${location}</small>
-                                    <small>${transactionCount} giao dịch</small>
+                            <div class="machine-item" style="margin-bottom: 10px;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px;">${machineName}</strong>
+                                    <div style="font-size: 13px; color: #4b5563; font-weight: 600; margin-bottom: 2px;">Vị trí: ${location}</div>
+                                    <div style="font-size: 12px; color: #6b7280; font-weight: 500;">${transactionCount} giao dịch</div>
                                 </div>
-                                <div class="revenue-stats">
-                                    <div class="revenue-amount" style="color: ${revenueClass};">
+                                <div class="revenue-stats" style="min-width: 100px; text-align: right;">
+                                    <div class="revenue-amount" style="color: ${revenueClass}; font-size: 18px; font-weight: 900; margin-bottom: 3px;">
                                         ${revenue > 0 ? '+' : ''}${Math.abs(revenue).toLocaleString()}
                                     </div>
-                                    <div class="revenue-details">
-                                        Vào: ${coinsIn.toLocaleString()} | Ra: ${coinsOut.toLocaleString()}
+                                    <div class="revenue-details" style="font-size: 11px; color: #4b5563; margin-bottom: 2px;">
+                                        Vào: ${coinsIn.toLocaleString()}
+                                    </div>
+                                    <div class="revenue-details" style="font-size: 11px; color: #4b5563; margin-bottom: 2px;">
+                                        Ra: ${coinsOut.toLocaleString()}
                                     </div>
                                     <div class="revenue-badge" style="background: ${revenue > 0 ? '#d4edda' : revenue < 0 ? '#f8d7da' : '#e9ecef'}; 
-                                                 color: ${revenue > 0 ? '#155724' : revenue < 0 ? '#721c24' : '#495057'};">
+                                                 color: ${revenue > 0 ? '#155724' : revenue < 0 ? '#721c24' : '#495057'}; 
+                                                 padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">
                                         Tỷ lệ: ${winRate}%
                                     </div>
                                 </div>
@@ -4375,22 +4388,28 @@
                 
                 const machinesList = document.getElementById('available-machines-list');
                 if (machinesList) {
-                    if (machines && machines.length > 0) {
-                        let machinesHtml = '';
-                        machines.forEach(machine => {
-                            machinesHtml += `
-                                <div class="machine-item" style="margin-bottom: 8px; opacity: 0.7;">
-                                    <div>
-                                        <strong>${machine.name}</strong><br>
-                                        <small style="color: #666;">📍 ${machine.location} | 🏢 ${machine.branch_name}</small>
+                                            if (machines && machines.length > 0) {
+                            let machinesHtml = '';
+                            machines.forEach(machine => {
+                                machinesHtml += `
+                                    <div class="machine-item" style="margin-bottom: 10px; opacity: 0.7;">
+                                        <div style="flex: 1; min-width: 0;">
+                                            <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px;">${machine.name}</strong>
+                                            <div style="font-size: 13px; color: #4b5563; font-weight: 600; margin-bottom: 2px;">Vị trí: ${machine.location}</div>
+                                            <div style="font-size: 12px; color: #6b7280; font-weight: 500;">0 giao dịch</div>
+                                        </div>
+                                        <div style="min-width: 100px; text-align: right;">
+                                            <div style="font-size: 18px; font-weight: 900; color: #6c757d; margin-bottom: 3px;">0</div>
+                                            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Vào: 0</div>
+                                            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Ra: 0</div>
+                                            <div style="background: #e9ecef; color: #495057; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">
+                                                Tỷ lệ: 0.0%
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div style="text-align: right; color: #6c757d;">
-                                        <span style="font-size: 0.9em;">Chưa có giao dịch</span>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        machinesList.innerHTML = machinesHtml;
+                                `;
+                            });
+                            machinesList.innerHTML = machinesHtml;
                     } else {
                         machinesList.innerHTML = '<div style="color: #999; font-style: italic;">Không có máy nào được tìm thấy</div>';
                     }
