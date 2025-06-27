@@ -4284,8 +4284,11 @@
                         const transactionCount = machine.transaction_count || 0;
                         
                         // DEBUG: Log machine info
-                        console.log(`Machine ${index}:`, {
+                        console.log(`🎮 Machine ${index}:`, {
+                            raw_machine_object: machine,
                             name: machineName,
+                            original_name: machine.name,
+                            machine_name_field: machine.machine_name,
                             location: location,
                             branch: branchName,
                             revenue: revenue,
@@ -4303,7 +4306,7 @@
                                     <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px; white-space: normal; line-height: 1.2;">${machineName}</strong>
                                     <div style="font-size: 13px; color: #4b5563; font-weight: 600; margin-bottom: 2px;">Vị trí: ${location}</div>
                                     <div style="font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 2px;">${transactionCount} giao dịch</div>
-                                    ${machine.serial ? `<div style="font-size: 11px; color: #059669; font-weight: 600; font-family: monospace;">Serial: ${machine.serial}</div>` : ''}
+                                    <div style="font-size: 11px; color: #059669; font-weight: 600; font-family: monospace;">ID: ${machine.id || machine.machine_id || 'N/A'}</div>
                                 </div>
                                 <div class="revenue-stats" style="min-width: 100px; text-align: right;">
                                     <div class="revenue-amount" style="color: ${revenueClass}; font-size: 18px; font-weight: 900; margin-bottom: 3px;">
@@ -4455,7 +4458,7 @@
                                             <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px; white-space: normal; line-height: 1.2;">${machine.name}</strong>
                                             <div style="font-size: 13px; color: #4b5563; font-weight: 600; margin-bottom: 2px;">Vị trí: ${machine.location}</div>
                                             <div style="font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 2px;">0 giao dịch</div>
-                                            ${machine.serial ? `<div style="font-size: 11px; color: #059669; font-weight: 600; font-family: monospace;">Serial: ${machine.serial}</div>` : ''}
+                                            <div style="font-size: 11px; color: #059669; font-weight: 600; font-family: monospace;">ID: ${machine.id || 'N/A'}</div>
                                         </div>
                                         <div style="min-width: 100px; text-align: right;">
                                             <div style="font-size: 18px; font-weight: 900; color: #6c757d; margin-bottom: 3px;">0</div>
