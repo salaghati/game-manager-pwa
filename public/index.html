@@ -2334,6 +2334,8 @@
             .machine-item > div:first-child {
                 flex: 1 !important;
                 min-width: 0 !important;
+                word-wrap: break-word !important;
+                overflow-wrap: anywhere !important;
             }
             
             .machine-item > div:last-child {
@@ -2347,6 +2349,8 @@
                 display: block !important;
                 margin-bottom: 4px !important;
                 line-height: 1.2 !important;
+                white-space: normal !important;
+                word-wrap: break-word !important;
             }
             
             .machine-item small {
@@ -2451,6 +2455,8 @@
             .machine-item > div:first-child {
                 flex: 1 !important;
                 min-width: 0 !important;
+                word-wrap: break-word !important;
+                overflow-wrap: anywhere !important;
             }
             
             .machine-item > div:last-child {
@@ -2464,6 +2470,8 @@
                 display: block !important;
                 margin-bottom: 4px !important;
                 line-height: 1.2 !important;
+                white-space: normal !important;
+                word-wrap: break-word !important;
             }
             
             .machine-item small {
@@ -3020,7 +3028,7 @@
                 <!-- Action Buttons -->
                 <div class="action-buttons" style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                     <button type="button" class="btn enhanced-btn primary-btn" onclick="loadDashboard()" style="background: #667eea; flex: 1; min-width: 120px;">
-                        🔍 Cập Nhật Báo Cáo
+                        🔍 CẬP NHẬT BÁO CÁO
                     </button>
                     <div id="export_section" style="display: none;">
                         <button type="button" class="btn enhanced-btn success-btn" onclick="exportCurrentData()" style="background: #28a745; min-width: 140px;">
@@ -3032,12 +3040,12 @@
                             🗑️ Reset Dữ Liệu
                         </button>
                     </div>
-                    <div style="flex: 1; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
-                        <button type="button" onclick="forceClearCache()" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em;">
-                            🗑️ Clear Cache
+                    <div style="flex: 1; text-align: right; display: flex !important; gap: 10px; justify-content: flex-end; visibility: visible !important;">
+                        <button type="button" onclick="forceClearCache()" style="background: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 0.85em !important; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">
+                            🗑️ CLEAR CACHE
                         </button>
-                        <button type="button" id="toggle-advanced" onclick="toggleAdvancedFilters()" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
-                            🔧 Bộ Lọc Nâng Cao <span id="toggle-icon">▼</span>
+                        <button type="button" id="toggle-advanced" onclick="toggleAdvancedFilters()" style="background: #6c757d !important; color: white !important; border: none !important; padding: 8px 15px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 0.9em !important; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">
+                            🔧 BỘ LỌC <span id="toggle-icon">▼</span>
                         </button>
                     </div>
                 </div>
@@ -3609,7 +3617,8 @@
         // Force clear cache function
         async function forceClearCache() {
             try {
-                console.log('🗑️ Force clearing all caches...');
+                console.log('🗑️🗑️🗑️ FORCE CLEARING ALL CACHES - BUTTON CLICKED! 🗑️🗑️🗑️');
+                alert('🗑️ Đang xóa cache... App sẽ reload sau 3 giây!');
                 
                 // Clear Service Worker caches
                 if ('caches' in window) {
@@ -3637,9 +3646,11 @@
                 localStorage.clear();
                 sessionStorage.clear();
                 
-                // Force reload with timestamp
+                // Force reload with timestamp after delay
                 console.log('🔄 Force reloading with cache bust...');
-                window.location.href = window.location.href.split('?')[0] + '?cachebust=' + Date.now();
+                setTimeout(() => {
+                    window.location.href = window.location.href.split('?')[0] + '?cachebust=' + Date.now();
+                }, 3000);
                 
             } catch (error) {
                 console.error('❌ Error clearing cache:', error);
@@ -4288,10 +4299,11 @@
                         
                         revenueHtml += `
                             <div class="machine-item" style="margin-bottom: 10px;">
-                                <div style="flex: 1; min-width: 0;">
-                                    <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px;">${machineName}</strong>
+                                <div style="flex: 1; min-width: 0; word-wrap: break-word; overflow-wrap: anywhere;">
+                                    <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px; white-space: normal; line-height: 1.2;">${machineName}</strong>
                                     <div style="font-size: 13px; color: #4b5563; font-weight: 600; margin-bottom: 2px;">Vị trí: ${location}</div>
-                                    <div style="font-size: 12px; color: #6b7280; font-weight: 500;">${transactionCount} giao dịch</div>
+                                    <div style="font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 2px;">${transactionCount} giao dịch</div>
+                                    ${machine.serial ? `<div style="font-size: 11px; color: #059669; font-weight: 600; font-family: monospace;">Serial: ${machine.serial}</div>` : ''}
                                 </div>
                                 <div class="revenue-stats" style="min-width: 100px; text-align: right;">
                                     <div class="revenue-amount" style="color: ${revenueClass}; font-size: 18px; font-weight: 900; margin-bottom: 3px;">
@@ -4439,10 +4451,11 @@
                             machines.forEach(machine => {
                                 machinesHtml += `
                                     <div class="machine-item" style="margin-bottom: 10px; opacity: 0.7;">
-                                        <div style="flex: 1; min-width: 0;">
-                                            <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px;">${machine.name}</strong>
+                                        <div style="flex: 1; min-width: 0; word-wrap: break-word; overflow-wrap: anywhere;">
+                                            <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px; white-space: normal; line-height: 1.2;">${machine.name}</strong>
                                             <div style="font-size: 13px; color: #4b5563; font-weight: 600; margin-bottom: 2px;">Vị trí: ${machine.location}</div>
-                                            <div style="font-size: 12px; color: #6b7280; font-weight: 500;">0 giao dịch</div>
+                                            <div style="font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 2px;">0 giao dịch</div>
+                                            ${machine.serial ? `<div style="font-size: 11px; color: #059669; font-weight: 600; font-family: monospace;">Serial: ${machine.serial}</div>` : ''}
                                         </div>
                                         <div style="min-width: 100px; text-align: right;">
                                             <div style="font-size: 18px; font-weight: 900; color: #6c757d; margin-bottom: 3px;">0</div>
