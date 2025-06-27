@@ -2656,30 +2656,31 @@
                 margin-right: 12px !important;
             }
             
-            /* Machine/Branch name - nổi bật hơn */
+            /* Machine names - rõ ràng và đậm */
             .machine-item strong, .branch-item strong {
-                font-size: 14px !important;
-                font-weight: 800 !important;
-                margin-bottom: 2px !important;
-                line-height: 1.1 !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                white-space: nowrap !important;
-                display: block !important;
-                color: #1f2937 !important;
-                text-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-            }
-            
-            /* Location/details - compact */
-            .machine-item small, .branch-item small {
-                font-size: 10px !important;
-                color: #666 !important;
+                font-size: 16px !important;
+                font-weight: 900 !important;
+                margin-bottom: 3px !important;
                 line-height: 1.2 !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
                 white-space: nowrap !important;
-                margin-bottom: 1px !important;
                 display: block !important;
+                color: #111827 !important;
+                letter-spacing: 0.5px !important;
+            }
+            
+            /* Location/details - rõ ràng hơn */
+            .machine-item small, .branch-item small {
+                font-size: 12px !important;
+                color: #4b5563 !important;
+                line-height: 1.3 !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                margin-bottom: 2px !important;
+                display: block !important;
+                font-weight: 600 !important;
             }
             
             /* Revenue section - nổi bật và dễ nhìn */
@@ -2696,27 +2697,28 @@
                 box-shadow: 0 2px 4px rgba(2, 132, 199, 0.1) !important;
             }
             
-            /* Revenue amount - nổi bật và dễ nhìn */
+            /* Revenue amount - số tiền nổi bật */
             .revenue-amount, 
             .machine-item .revenue-stats strong,
             .branch-item .revenue-stats strong {
-                font-size: 16px !important;
-                font-weight: 800 !important;
-                color: #059669 !important;
-                margin-bottom: 2px !important;
+                font-size: 18px !important;
+                font-weight: 900 !important;
+                color: #047857 !important;
+                margin-bottom: 3px !important;
                 line-height: 1 !important;
                 display: block !important;
-                text-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+                letter-spacing: 0.5px !important;
             }
             
-            /* Revenue details - nhỏ hơn */
+            /* Revenue details - rõ ràng hơn */
             .revenue-details,
             .machine-item .revenue-stats small,
             .branch-item .revenue-stats small {
-                font-size: 9px !important;
-                color: #666 !important;
-                line-height: 1.1 !important;
+                font-size: 11px !important;
+                color: #4b5563 !important;
+                line-height: 1.2 !important;
                 display: block !important;
+                font-weight: 500 !important;
             }
             
             /* Win rate percentage - nếu có */
@@ -4184,29 +4186,12 @@
                 const machineRevenue = document.getElementById('machine-revenue');
                 let revenueHtml = '';
                 
-                if (data.branches && data.branches.length > 0) {
-                    revenueHtml += '<h3>🏢 Doanh Thu Theo Chi Nhánh</h3>';
-                    data.branches.forEach(branch => {
-                        revenueHtml += `
-                            <div class="machine-item branch-item" data-type="branch">
-                                <div class="branch-info">
-                                    <strong>${branch.branch_name}</strong>
-                                    <small style="color: #666;">📍 ${branch.address || 'N/A'}</small>
-                                    <small style="color: #888;">👨‍💼 ${branch.manager_name || 'N/A'} • 🎮 ${branch.machine_count || 0} máy</small>
-                                </div>
-                                <div class="branch-revenue">
-                                    <div class="amount">${(branch.total_revenue || 0).toLocaleString()}</div>
-                                    <div class="details">${(branch.total_coins_in || 0).toLocaleString()}|${(branch.total_coins_out || 0).toLocaleString()}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
+                // Bỏ thông tin chi nhánh - Manager chỉ cần theo dõi máy
 
                 // Hiển thị doanh thu theo máy - LUÔN hiển thị section này
                 revenueHtml += `
-                    <h3 style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between;">
-                        🎮 Doanh Thu Theo Máy 
+                    <h3 style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 18px; font-weight: 900; color: #111827;">
+                        DOANH THU THEO MÁY
                         <span style="font-size: 12px; background: #17a2b8; color: white; padding: 2px 8px; border-radius: 4px; font-weight: normal;">
                             DEBUG MODE
                         </span>
@@ -4250,19 +4235,19 @@
                             <div class="machine-item" style="margin-bottom: 8px;">
                                 <div>
                                     <strong>${machineName}</strong>
-                                    <small style="color: #666;">📍 ${location}</small>
-                                    <small style="color: #888;">🏢 ${branchName} • 📊 ${transactionCount} GD</small>
+                                    <small>${location}</small>
+                                    <small>${transactionCount} giao dịch</small>
                                 </div>
                                 <div class="revenue-stats">
                                     <div class="revenue-amount" style="color: ${revenueClass};">
                                         ${revenue > 0 ? '+' : ''}${Math.abs(revenue).toLocaleString()}
                                     </div>
                                     <div class="revenue-details">
-                                        ${coinsIn.toLocaleString()}|${coinsOut.toLocaleString()}
+                                        Vào: ${coinsIn.toLocaleString()} | Ra: ${coinsOut.toLocaleString()}
                                     </div>
                                     <div class="revenue-badge" style="background: ${revenue > 0 ? '#d4edda' : revenue < 0 ? '#f8d7da' : '#e9ecef'}; 
                                                  color: ${revenue > 0 ? '#155724' : revenue < 0 ? '#721c24' : '#495057'};">
-                                        ${revenueIcon} ${winRate}%
+                                        Tỷ lệ: ${winRate}%
                                     </div>
                                 </div>
                             </div>
@@ -4276,24 +4261,23 @@
                     console.log('🔍 DEBUG data object keys:', Object.keys(data));
                     
                     // Fallback: Hiển thị thông báo và load danh sách máy
-                    revenueHtml += `
-                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7; margin-bottom: 15px;">
-                            <p style="color: #856404; margin: 0; text-align: center; font-weight: 600;">
-                                ⚠️ Không có dữ liệu giao dịch trong khoảng thời gian này
-                            </p>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
-                            <h4 style="color: #495057; font-size: 1em; margin-bottom: 10px; display: flex; align-items: center;">
-                                📋 Danh sách máy hiện có:
-                            </h4>
-                            <div id="available-machines-list">
-                                <div style="color: #6c757d; font-style: italic; text-align: center; padding: 10px;">
-                                    <div style="font-size: 1.5em; margin-bottom: 5px;">⏳</div>
-                                    Đang tải danh sách máy...
+                                            revenueHtml += `
+                            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7; margin-bottom: 15px;">
+                                <p style="color: #856404; margin: 0; text-align: center; font-weight: 600;">
+                                    Không có dữ liệu giao dịch trong khoảng thời gian này
+                                </p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
+                                <h4 style="color: #495057; font-size: 1em; margin-bottom: 10px; font-weight: 700;">
+                                    DANH SÁCH MÁY HIỆN CÓ:
+                                </h4>
+                                <div id="available-machines-list">
+                                    <div style="color: #6c757d; font-style: italic; text-align: center; padding: 10px;">
+                                        Đang tải danh sách máy...
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
                     
                     // Load danh sách máy để hiển thị fallback
                     setTimeout(() => loadAvailableMachinesForDashboard(branchId), 100);
