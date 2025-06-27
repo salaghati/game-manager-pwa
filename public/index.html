@@ -6,6 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="cache-bust" content="v20241231-${Date.now()}">
     <title>Game Manager - Quản Lý Máy Chơi Game</title>
     
     <!-- PWA Meta Tags cho iPhone -->
@@ -3031,7 +3032,10 @@
                             🗑️ Reset Dữ Liệu
                         </button>
                     </div>
-                    <div style="flex: 1; text-align: right;">
+                    <div style="flex: 1; text-align: right; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="forceClearCache()" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85em;">
+                            🗑️ Clear Cache
+                        </button>
                         <button type="button" id="toggle-advanced" onclick="toggleAdvancedFilters()" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9em;">
                             🔧 Bộ Lọc Nâng Cao <span id="toggle-icon">▼</span>
                         </button>
@@ -3170,10 +3174,10 @@
                     .then(reg => {
                         console.log('Service Worker registered');
                         
-                        // Check for updates every 30 seconds
+                        // Aggressive update checking every 10 seconds for cache issues
                         setInterval(() => {
                             reg.update();
-                        }, 30000);
+                        }, 10000);
                         
                         // Listen for updates
                         reg.addEventListener('updatefound', () => {
@@ -3183,8 +3187,8 @@
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                     console.log('📱 New content available, reloading...');
-                                    // Auto reload for immediate updates
-                                    window.location.reload();
+                                    // Force reload with cache busting
+                                    window.location.href = window.location.href.split('?')[0] + '?v=' + Date.now();
                                 }
                             });
                         });
@@ -3599,6 +3603,48 @@
                 profitDisplay.value = '';
                 profitDisplay.style.color = '#333';
                 profitDisplay.style.background = '#f8f9fa';
+            }
+        }
+
+        // Force clear cache function
+        async function forceClearCache() {
+            try {
+                console.log('🗑️ Force clearing all caches...');
+                
+                // Clear Service Worker caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => {
+                            console.log('🗑️ Deleting cache:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                }
+                
+                // Unregister service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(
+                        registrations.map(registration => {
+                            console.log('🗑️ Unregistering SW:', registration);
+                            return registration.unregister();
+                        })
+                    );
+                }
+                
+                // Clear localStorage and sessionStorage
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Force reload with timestamp
+                console.log('🔄 Force reloading with cache bust...');
+                window.location.href = window.location.href.split('?')[0] + '?cachebust=' + Date.now();
+                
+            } catch (error) {
+                console.error('❌ Error clearing cache:', error);
+                // Fallback: simple reload
+                window.location.reload(true);
             }
         }
 
