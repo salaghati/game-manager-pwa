@@ -2615,9 +2615,21 @@
                 border-radius: 12px !important;
                 border-left: 4px solid #667eea !important;
                 box-shadow: 0 3px 10px rgba(0,0,0,0.08) !important;
-                overflow: hidden !important;
+                overflow: visible !important;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 position: relative !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 1 !important;
+            }
+            
+            /* Force visibility cho machine revenue container */
+            #machine-revenue {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                min-height: 100px !important;
+                overflow: visible !important;
             }
             
             /* Touch interactions */
@@ -3192,7 +3204,7 @@
                 }
                 
                 .machine-item, .branch-item {
-                    opacity: 0;
+                    opacity: 1 !important;
                 }
                 
                 @keyframes pulse {
@@ -4299,6 +4311,26 @@
                 console.log('🔄 Setting machineRevenue.innerHTML with', revenueHtml.length, 'chars');
                 machineRevenue.innerHTML = revenueHtml;
                 console.log('✅ machineRevenue DOM updated. Children count:', machineRevenue.children.length);
+                
+                // DEBUG: Inspect DOM visibility
+                console.log('🔍 machineRevenue styles:', {
+                    display: getComputedStyle(machineRevenue).display,
+                    visibility: getComputedStyle(machineRevenue).visibility,
+                    height: getComputedStyle(machineRevenue).height,
+                    overflow: getComputedStyle(machineRevenue).overflow
+                });
+                
+                // DEBUG: Check machine items
+                const machineItemsInDOM = machineRevenue.querySelectorAll('.machine-item');
+                console.log('🎮 Machine items in DOM:', machineItemsInDOM.length);
+                machineItemsInDOM.forEach((item, index) => {
+                    console.log(`Machine ${index}:`, {
+                        display: getComputedStyle(item).display,
+                        visibility: getComputedStyle(item).visibility,
+                        height: getComputedStyle(item).height,
+                        opacity: getComputedStyle(item).opacity
+                    });
+                });
 
                 // Load thông tin giao dịch gần đây cho manager/admin
                 if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) {
