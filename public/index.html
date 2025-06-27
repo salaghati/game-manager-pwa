@@ -3366,20 +3366,25 @@
                         }
                     });
                 }
-                
-                console.log('🔧 Super force mobile layout applied to', machineItems.length, 'items');
             }
             
-            // Run super force every 500ms for first 10 seconds, then every 2 seconds
-            let superForceCounter = 0;
-            const superForceInterval = setInterval(() => {
-                superForceMobileLayout();
-                superForceCounter++;
-                if (superForceCounter >= 20) { // 20 * 500ms = 10 seconds
-                    clearInterval(superForceInterval);
-                    setInterval(superForceMobileLayout, 2000); // Continue every 2 seconds
+            // Run super force less frequently to avoid errors
+            setTimeout(() => {
+                try {
+                    superForceMobileLayout();
+                } catch (e) {
+                    console.log('⚠️ Super force layout error:', e);
                 }
-            }, 500);
+            }, 1000);
+            
+            // Run again after dashboard loads
+            setTimeout(() => {
+                try {
+                    superForceMobileLayout();
+                } catch (e) {
+                    console.log('⚠️ Super force layout error:', e);
+                }
+            }, 3000);
             
             // Prevent zoom on input focus cho iPhone
             const viewportMeta = document.querySelector('meta[name="viewport"]');
@@ -4227,6 +4232,9 @@
                             </div>
                         `;
                     });
+                    
+                    console.log('✅ Generated HTML for', sortedMachines.length, 'machines');
+                    console.log('🔍 First machine HTML preview:', revenueHtml.substring(revenueHtml.length - 200));
                 } else {
                     console.log('❌ Không có machines data, hiển thị fallback');
                     console.log('🔍 DEBUG data object keys:', Object.keys(data));
@@ -4288,7 +4296,9 @@
                     `;
                 }
                 
+                console.log('🔄 Setting machineRevenue.innerHTML with', revenueHtml.length, 'chars');
                 machineRevenue.innerHTML = revenueHtml;
+                console.log('✅ machineRevenue DOM updated. Children count:', machineRevenue.children.length);
 
                 // Load thông tin giao dịch gần đây cho manager/admin
                 if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) {
