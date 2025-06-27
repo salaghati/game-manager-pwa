@@ -1,4 +1,4 @@
-const CACHE_NAME = 'game-manager-pwa-v1.0.0';
+const CACHE_NAME = `game-manager-pwa-v1.0.0-${Date.now()}`;
 const urlsToCache = [
     '/',
     '/index.html',
@@ -11,6 +11,9 @@ const urlsToCache = [
 // Install event
 self.addEventListener('install', (event) => {
     console.log('📱 PWA Service Worker: Installing...');
+    // Force immediate activation
+    self.skipWaiting();
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
@@ -69,17 +72,23 @@ self.addEventListener('fetch', (event) => {
 // Activate event
 self.addEventListener('activate', (event) => {
     console.log('📱 PWA Service Worker: Activating...');
+    // Take control of all clients immediately
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('📱 PWA Service Worker: Deleting old cache', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        Promise.all([
+            // Delete old caches
+            caches.keys().then((cacheNames) => {
+                return Promise.all(
+                    cacheNames.map((cacheName) => {
+                        if (cacheName !== CACHE_NAME) {
+                            console.log('📱 PWA Service Worker: Deleting old cache', cacheName);
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            }),
+            // Take control immediately
+            self.clients.claim()
+        ])
     );
 });
 
