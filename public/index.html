@@ -4163,12 +4163,27 @@
                 }
 
                 // Hiển thị doanh thu theo máy - LUÔN hiển thị section này
-                revenueHtml += '<h3 style="margin-top: 20px;">🎮 Doanh Thu Theo Máy</h3>';
+                revenueHtml += `
+                    <h3 style="margin-top: 20px; display: flex; align-items: center; justify-content: space-between;">
+                        🎮 Doanh Thu Theo Máy 
+                        <span style="font-size: 12px; background: #17a2b8; color: white; padding: 2px 8px; border-radius: 4px; font-weight: normal;">
+                            DEBUG MODE
+                        </span>
+                    </h3>
+                `;
+                
+                // DEBUG: Log để kiểm tra data
+                console.log('🔍 DEBUG Dashboard Data:', data);
+                console.log('🔍 DEBUG data.machines:', data.machines);
+                console.log('🔍 DEBUG Array.isArray(data.machines):', Array.isArray(data.machines));
                 
                 // Fix: đảm bảo data.machines là array
                 const machinesArray = Array.isArray(data.machines) ? data.machines : [];
                 
+                console.log('🔍 DEBUG machinesArray length:', machinesArray.length);
+                
                 if (machinesArray && machinesArray.length > 0) {
+                    console.log('✅ Có', machinesArray.length, 'máy để hiển thị');
                     
                     // Store dashboard machines để so sánh với recent transactions
                     window.lastDashboardMachines = machinesArray;
@@ -4213,23 +4228,31 @@
                         `;
                     });
                 } else {
-                    // Fallback: Hiển thị danh sách máy hiện có với doanh thu 0
+                    console.log('❌ Không có machines data, hiển thị fallback');
+                    console.log('🔍 DEBUG data object keys:', Object.keys(data));
+                    
+                    // Fallback: Hiển thị thông báo và load danh sách máy
                     revenueHtml += `
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px dashed #dee2e6;">
-                            <p style="color: #6c757d; margin: 0; text-align: center;">
-                                📊 Chưa có giao dịch nào trong khoảng thời gian này
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7; margin-bottom: 15px;">
+                            <p style="color: #856404; margin: 0; text-align: center; font-weight: 600;">
+                                ⚠️ Không có dữ liệu giao dịch trong khoảng thời gian này
                             </p>
                         </div>
-                        <div style="margin-top: 15px;">
-                            <h4 style="color: #666; font-size: 0.95em; margin-bottom: 10px;">📋 Danh sách máy hiện có:</h4>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6;">
+                            <h4 style="color: #495057; font-size: 1em; margin-bottom: 10px; display: flex; align-items: center;">
+                                📋 Danh sách máy hiện có:
+                            </h4>
                             <div id="available-machines-list">
-                                <div style="color: #666; font-style: italic;">Đang tải danh sách máy...</div>
+                                <div style="color: #6c757d; font-style: italic; text-align: center; padding: 10px;">
+                                    <div style="font-size: 1.5em; margin-bottom: 5px;">⏳</div>
+                                    Đang tải danh sách máy...
+                                </div>
                             </div>
                         </div>
                     `;
                     
                     // Load danh sách máy để hiển thị fallback
-                    loadAvailableMachinesForDashboard(branchId);
+                    setTimeout(() => loadAvailableMachinesForDashboard(branchId), 100);
                 }
                 
                 if (!revenueHtml) {
@@ -4280,16 +4303,25 @@
 
         // Load danh sách máy để hiển thị khi không có data
         async function loadAvailableMachinesForDashboard(branchId) {
+            console.log('🔄 Loading available machines for dashboard...');
             try {
                 let url = `${API_BASE}/api/machines`;
                 if (branchId) {
                     url += `?branch_id=${branchId}`;
                 }
                 
+                console.log('📡 Fetching machines from:', url);
+                
                 const response = await fetch(url, {
                     credentials: 'include'
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const machines = await response.json();
+                console.log('✅ Machines loaded:', machines.length, 'máy');
                 
                 const machinesList = document.getElementById('available-machines-list');
                 if (machinesList) {
