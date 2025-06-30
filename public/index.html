@@ -2911,10 +2911,60 @@
             }
         }
 
+        /* Quick filter button styles */
+        .quick-filter-btn {
+            transition: all 0.3s ease;
+            color: #333 !important;
+        }
+
+        /* Default text colors for non-active buttons */
+        .quick-filter-btn div:first-child {
+            color: #333 !important;
+        }
+
+        .quick-filter-btn div:nth-child(2) {
+            color: #333 !important;
+            font-weight: bold;
+        }
+
+        .quick-filter-btn div:nth-child(3) {
+            color: #6c757d !important;
+            font-size: 0.8em;
+        }
+
+        .quick-filter-btn:hover {
+            border-color: #667eea !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        .quick-filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border-color: #667eea !important;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
         /* Override tất cả quick-filter-btn.active để đảm bảo màu chữ trắng */
         .quick-filter-btn.active,
         .quick-filter-btn.active *,
-        .quick-filter-btn.active div {
+        .quick-filter-btn.active div,
+        .quick-filter-btn.active div[style*="color"] {
+            color: white !important;
+        }
+
+        /* Đảm bảo text trong button active luôn màu trắng với specificity cao nhất */
+        .quick-filter-btn.active div:first-child,
+        .quick-filter-btn.active div:nth-child(2),
+        .quick-filter-btn.active div:nth-child(3),
+        .quick-filter-btn.active div:last-child {
+            color: white !important;
+            opacity: 1 !important;
+        }
+        
+        /* Force màu trắng cho button week khi active */
+        .quick-filter-btn.active[data-period="week"] div,
+        .quick-filter-btn.active[data-period="week"] * {
             color: white !important;
         }
     </style>
@@ -3011,22 +3061,22 @@
                         <button class="quick-filter-btn" data-period="today" onclick="setQuickFilter('today')" style="padding: 12px 8px; border-radius: 8px; border: 2px solid #e9ecef; background: #fff; cursor: pointer; transition: all 0.3s ease; text-align: center; font-size: 0.9em;">
                             <div style="font-size: 1.4em;">🕐</div>
                             <div style="font-weight: bold; margin: 5px 0;">HÔM NAY</div>
-                            <div style="font-size: 0.8em; color: #6c757d;" id="today-date"></div>
+                            <div style="font-size: 0.8em;" id="today-date"></div>
                         </button>
                         <button class="quick-filter-btn" data-period="yesterday" onclick="setQuickFilter('yesterday')" style="padding: 12px 8px; border-radius: 8px; border: 2px solid #e9ecef; background: #fff; cursor: pointer; transition: all 0.3s ease; text-align: center; font-size: 0.9em;">
                             <div style="font-size: 1.4em;">📅</div>
                             <div style="font-weight: bold; margin: 5px 0;">HÔM QUA</div>
-                            <div style="font-size: 0.8em; color: #6c757d;" id="yesterday-date"></div>
+                            <div style="font-size: 0.8em;" id="yesterday-date"></div>
                         </button>
                         <button class="quick-filter-btn" data-period="week" onclick="setQuickFilter('week')" style="padding: 12px 8px; border-radius: 8px; border: 2px solid #e9ecef; background: #fff; cursor: pointer; transition: all 0.3s ease; text-align: center; font-size: 0.9em;">
                             <div style="font-size: 1.4em;">📊</div>
-                            <div style="font-weight: bold; margin: 5px 0;">7 NGÀY QUA</div>
-                            <div style="font-size: 0.8em; color: #6c757d;" id="week-date"></div>
+                            <div style="font-weight: bold; margin: 5px 0; color: inherit;">7 NGÀY QUA</div>
+                            <div style="font-size: 0.8em; color: inherit;" id="week-date"></div>
                         </button>
                         <button class="quick-filter-btn" data-period="month" onclick="setQuickFilter('month')" style="padding: 12px 8px; border-radius: 8px; border: 2px solid #e9ecef; background: #fff; cursor: pointer; transition: all 0.3s ease; text-align: center; font-size: 0.9em;">
                             <div style="font-size: 1.4em;">📈</div>
                             <div style="font-weight: bold; margin: 5px 0;">THÁNG NÀY</div>
-                            <div style="font-size: 0.8em; color: #6c757d;" id="month-date"></div>
+                            <div style="font-size: 0.8em;" id="month-date"></div>
                         </button>
                     </div>
                 </div>
