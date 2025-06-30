@@ -314,87 +314,16 @@ app.get('/api/transactions', requireAuth, async (req, res) => {
 
 app.get('/api/dashboard', requireManagerOrAdmin, async (req, res) => {
     try {
-        const { branch_id, start_date, end_date } = req.query;
+        const { start_date, end_date } = req.query;
         const user = req.session.user;
         
-        let branchId = null;
-        if (user.role === 'manager') {
-            branchId = user.branch_id;
-        } else if (branch_id) {
-            branchId = parseInt(branch_id);
-        }
+        // Manager sẽ chỉ thấy chi nhánh của mình, admin có thể xem tất cả.
+        const branchId = user.role === 'manager' ? user.branch_id : (req.query.branch_id || null);
         
-        console.log('🔍 Dashboard API - Testing Database Calls');
-        console.log('User:', user.username, 'Role:', user.role, 'Branch:', branchId);
-        console.log('🗓️ Date filters:', { start_date, end_date });
+        const dashboardData = await db.getDashboardData(branchId, start_date, end_date);
         
-        let branchRevenue, machineRevenue;
-        
-        try {
-            // Use actual date filters from request
-            console.log('📊 Getting branch revenue with date filter...');
-            branchRevenue = await db.getBranchRevenue(branchId, start_date, end_date);
-            console.log('✅ getBranchRevenue success:', branchRevenue);
-            
-            // If no data returned, use empty array instead of fallback data
-            if (!branchRevenue || branchRevenue.length === 0) {
-                console.log('ℹ️ No branch revenue data found for period');
-                branchRevenue = [];
-            }
-        } catch (error) {
-            console.error('❌ getBranchRevenue failed:', error.message);
-            console.error('Stack:', error.stack);
-            
-            // Return empty array instead of fallback data when there's no data
-            branchRevenue = [];
-        }
-        
-        try {
-            console.log('🎮 Getting machine revenue with date filter...');
-            console.log('🎮 Calling getRevenue with params:', { branchId, machineId: null, start_date, end_date });
-            machineRevenue = await db.getRevenue(branchId, null, start_date, end_date);
-            console.log('✅ getRevenue success:', machineRevenue);
-            console.log('✅ getRevenue type:', typeof machineRevenue);
-            console.log('✅ getRevenue isArray:', Array.isArray(machineRevenue));
-            console.log('✅ getRevenue length:', machineRevenue?.length);
-            
-            if (machineRevenue && machineRevenue.length > 0) {
-                console.log('🎮 First machine in result:', machineRevenue[0]);
-            }
-            
-            // If no data returned, use empty array instead of fallback data
-            if (!machineRevenue || machineRevenue.length === 0) {
-                console.log('ℹ️ No machine revenue data found for period');
-                machineRevenue = [];
-            }
-        } catch (error) {
-            console.error('❌ getRevenue failed:', error.message);
-            console.error('Stack:', error.stack);
-            
-            // Return empty array instead of fallback data when there's no data
-            machineRevenue = [];
-        }
-        
-        const totalRevenue = branchRevenue.reduce((sum, branch) => sum + (branch.total_revenue || 0), 0);
-        const totalCoinsIn = branchRevenue.reduce((sum, branch) => sum + (branch.total_coins_in || 0), 0);
-        const totalCoinsOut = branchRevenue.reduce((sum, branch) => sum + (branch.total_coins_out || 0), 0);
-        const totalMachines = branchRevenue.reduce((sum, branch) => sum + (branch.machine_count || 0), 0);
-        
-        const responseData = {
-            total_revenue: totalRevenue,
-            total_coins_in: totalCoinsIn,
-            total_coins_out: totalCoinsOut,
-            total_machines: totalMachines,
-            branch_count: branchRevenue.length,
-            branches: branchRevenue,
-            machines: machineRevenue
-        };
-        
-        console.log('📤 Final dashboard response:', responseData);
-        console.log('📤 machines field type:', typeof responseData.machines);
-        console.log('📤 machines field isArray:', Array.isArray(responseData.machines));
-        
-        res.json(responseData);
+        res.json(dashboardData);
+
     } catch (error) {
         console.error('Error getting dashboard data:', error);
         res.status(500).json({ error: 'Lỗi khi lấy dữ liệu dashboard' });

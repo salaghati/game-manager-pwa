@@ -973,6 +973,135 @@ class Database {
         this.db.close();
         }
     }
+
+    // Lấy dữ liệu tổng hợp cho Dashboard
+    async getDashboardData(branchId = null, startDate = null, endDate = null) {
+        if (this.isPostgres) {
+            return this.getDashboardDataPostgres(branchId, startDate, endDate);
+        } else {
+            return this.getDashboardDataSQLite(branchId, startDate, endDate);
+        }
+    }
+
+    async getDashboardDataPostgres(branchId = null, startDate = null, endDate = null) {
+        const client = await this.pool.connect();
+        try {
+            const params = [];
+            let dateFilter = '';
+            if (startDate && endDate) {
+                params.push(startDate, endDate);
+                dateFilter = `AND t.transaction_date BETWEEN $${params.length - 1} AND $${params.length}`;
+            }
+
+            let branchFilter = '';
+            if (branchId) {
+                params.push(branchId);
+                branchFilter = `WHERE t.branch_id = $${params.length}`;
+            }
+            
+            let machineBranchFilter = branchId ? `WHERE branch_id = $${params.length}` : '';
+
+
+            // Query 1: Lấy các chỉ số tổng quan (doanh thu, xu vào/ra)
+            const statsQuery = `
+                SELECT 
+                    COALESCE(SUM(t.revenue), 0) AS total_revenue,
+                    COALESCE(SUM(t.coins_in), 0) AS total_coins_in,
+                    COALESCE(SUM(t.coins_out), 0) AS total_coins_out,
+                    COUNT(DISTINCT t.machine_id) AS total_machines_with_transactions
+                FROM transactions t
+                ${branchFilter.replace('t.', '')} ${dateFilter.replace('t.', '')};
+            `;
+            const statsResult = await client.query(statsQuery, params);
+
+            // Query 2: Lấy tổng số máy của chi nhánh (không phụ thuộc ngày)
+            const totalMachinesQuery = `
+                SELECT COUNT(*) AS total_machines FROM machines ${machineBranchFilter.replace('t.', 'm.')};
+            `;
+            const totalMachinesResult = await client.query(totalMachinesQuery, branchId ? [branchId] : []);
+            
+            // Query 3: Lấy doanh thu chi tiết theo từng máy
+            const machinesQuery = `
+                SELECT
+                    m.id,
+                    m.name,
+                    m.location,
+                    b.name as branch_name,
+                    COALESCE(SUM(t.revenue), 0) as total_revenue,
+                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
+                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                    COUNT(t.id) as transaction_count
+                FROM machines m
+                LEFT JOIN transactions t ON m.id = t.machine_id ${dateFilter}
+                JOIN branches b ON m.branch_id = b.id
+                ${branchId ? `WHERE m.branch_id = $1` : ''}
+                GROUP BY m.id, b.name
+                ORDER BY total_revenue DESC;
+            `;
+            const machinesResult = await client.query(machinesQuery, branchId ? [branchId] : []);
+
+            return {
+                ...statsResult.rows[0],
+                total_machines: totalMachinesResult.rows[0].total_machines,
+                machines: machinesResult.rows
+            };
+        } finally {
+            client.release();
+        }
+    }
+
+    // Khởi tạo dữ liệu mẫu cho SQLite
+    async initSampleDataSQLite() {
+        this.db.get("SELECT COUNT(*) as count FROM branches", (err, row) => {
+            if (err) {
+                console.error('Error checking branches:', err);
+                return;
+            }
+            
+            if (row && row.count === 0) {
+                console.log('🏢 Khởi tạo dữ liệu mẫu...');
+                
+                // Thêm chi nhánh mẫu
+                this.db.run(`INSERT INTO branches (name, address, phone, manager_name) VALUES 
+                    ('Chi Nhánh Quận 1', '123 Nguyễn Huệ, Q.1, TP.HCM', '028-1234-5678', 'Nguyễn Văn A'),
+                    ('Chi Nhánh Quận 3', '456 Võ Văn Tần, Q.3, TP.HCM', '028-2345-6789', 'Trần Thị B')`, (err) => {
+                    if (err) {
+                        console.error('Error inserting branches:', err);
+                        return;
+                    }
+                    
+                    // Thêm users mẫu (password: 123456)
+                    this.db.run(`INSERT INTO users (username, password, full_name, role, branch_id) VALUES 
+                        ('admin', '123456', 'Quản Trị Viên', 'admin', NULL),
+                        ('manager1', '123456', 'Nguyễn Văn A', 'manager', 1),
+                        ('manager2', '123456', 'Trần Thị B', 'manager', 2),
+                        ('nv001', '123456', 'Lê Văn C', 'employee', 1),
+                        ('nv002', '123456', 'Phạm Thị D', 'employee', 2)`, (err) => {
+                        if (err) {
+                            console.error('Error inserting users:', err);
+                            return;
+                        }
+
+                        // Thêm máy chơi game mẫu
+                        this.db.run(`INSERT INTO machines (name, location, branch_id) VALUES 
+                            ('Máy Game 001 (Serial: 65543001)', 'Tầng 1 - Khu A', 1),
+                            ('Máy Game 002 (Serial: 65543002)', 'Tầng 1 - Khu B', 1),
+                            ('Máy Game 003 (Serial: 65543003)', 'Tầng 2 - Khu A', 1),
+                            ('Máy Game 101 (Serial: 65543017)', 'Tầng 1 - Khu A', 2),
+                            ('Máy Game 102 (Serial: 65543018)', 'Tầng 1 - Khu B', 2)`, (err) => {
+                            if (err) {
+                                console.error('Error inserting machines:', err);
+                            } else {
+                                console.log('✅ Dữ liệu mẫu đã được khởi tạo thành công!');
+                            }
+                        });
+                    });
+                });
+            } else {
+                console.log('📊 Dữ liệu đã tồn tại, bỏ qua khởi tạo mẫu');
+            }
+        });
+    }
 }
 
 module.exports = Database; 
