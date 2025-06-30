@@ -3438,32 +3438,40 @@
             checkAuth();
             setDefaultDates();
             
-            // Register service worker cho PWA với auto-reload
+            // Robust PWA Service Worker registration and update flow
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => {
-                        console.log('Service Worker registered');
-                        
-                        // Aggressive update checking every 10 seconds for cache issues
-                        setInterval(() => {
-                            reg.update();
-                        }, 10000);
-                        
-                        // Listen for updates
-                        reg.addEventListener('updatefound', () => {
-                            console.log('📱 New Service Worker available');
-                            const newWorker = reg.installing;
-                            
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('📱 New content available, reloading...');
-                                    // Force reload with cache busting
-                                    window.location.href = window.location.href.split('?')[0] + '?v=' + Date.now();
-                                }
-                            });
+                let refreshing = false;
+                
+                // Listen for controller change and reload page
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        console.log('🔄 Controller changed. Reloading page...');
+                        window.location.reload();
+                        refreshing = true;
+                    }
+                });
+
+                navigator.serviceWorker.register('/sw.js').then(reg => {
+                    console.log('Service Worker registered.');
+
+                    // Logic to handle updates
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        console.log('📱 New Service Worker found, installing.');
+
+                        newWorker.addEventListener('statechange', () => {
+                            console.log('👷 Worker state changed to:', newWorker.state);
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New worker is installed and waiting.
+                                // Send message to new worker to skip waiting.
+                                console.log('✅ New worker installed. Sending SKIP_WAITING message.');
+                                newWorker.postMessage({ type: 'SKIP_WAITING' });
+                            }
                         });
-                    })
-                    .catch(err => console.log('Service Worker registration failed'));
+                    });
+                }).catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
             }
             
             // Enhanced touch interactions

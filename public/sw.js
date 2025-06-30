@@ -12,9 +12,6 @@ const urlsToCache = [
 // Install event
 self.addEventListener('install', (event) => {
     console.log('📱 PWA Service Worker: Installing...');
-    // Force immediate activation
-    self.skipWaiting();
-    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
@@ -25,6 +22,14 @@ self.addEventListener('install', (event) => {
                 console.error('📱 PWA Service Worker: Cache failed', error);
             })
     );
+});
+
+// Listen for message from client to skip waiting
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('📱 PWA Service Worker: Skip waiting signal received. Activating new worker.');
+        self.skipWaiting();
+    }
 });
 
 // Fetch event
