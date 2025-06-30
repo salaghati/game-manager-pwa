@@ -2970,32 +2970,65 @@
 
         /* Mobile: Force 3 box thống kê nhập liệu nằm ngang */
         @media (max-width: 768px) {
-            /* Override grid để force 3 columns trên mobile */
-            .late-entry-stats div[style*="display: grid"] {
+            /* Target tất cả div có grid-template-columns trong thống kê */
+            div[style*="grid-template-columns: repeat(3, 1fr)"] {
                 display: grid !important;
                 grid-template-columns: repeat(3, 1fr) !important;
                 gap: 8px !important;
+                margin: 8px 0 !important;
             }
             
-            /* Giảm padding và font size cho mobile */
-            .late-entry-stats div[style*="text-align: center"] {
+            /* Target tất cả div con có text-align center */
+            div[style*="grid-template-columns: repeat(3, 1fr)"] > div[style*="text-align: center"] {
                 padding: 8px 4px !important;
-                font-size: 0.9em !important;
+                font-size: 0.85em !important;
             }
             
-            .late-entry-stats div[style*="font-size: 1.5em"] {
-                font-size: 1.2em !important;
+            /* Target số lớn */
+            div[style*="grid-template-columns: repeat(3, 1fr)"] div[style*="font-size: 1.5em"] {
+                font-size: 1.1em !important;
+                margin-bottom: 2px !important;
             }
         }
 
         @media (max-width: 480px) {
-            /* Còn nhỏ hơn nữa thì giảm padding */
-            .late-entry-stats div[style*="text-align: center"] {
+            /* iPhone và màn hình nhỏ */
+            div[style*="grid-template-columns: repeat(3, 1fr)"],
+            .stats-row-mobile {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 4px !important;
+                margin: 5px 0 !important;
+            }
+            
+            div[style*="grid-template-columns: repeat(3, 1fr)"] > div[style*="text-align: center"],
+            .stats-row-mobile > div[style*="text-align: center"] {
                 padding: 6px 2px !important;
+                font-size: 0.75em !important;
+            }
+            
+            div[style*="grid-template-columns: repeat(3, 1fr)"] div[style*="font-size: 1.5em"],
+            .stats-row-mobile div[style*="font-size: 1.5em"] {
+                font-size: 0.95em !important;
+                margin-bottom: 1px !important;
+            }
+        }
+
+        /* Thêm CSS tổng quát cho mobile */
+        @media screen and (max-width: 767px) {
+            .stats-row-mobile {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 6px !important;
+                margin: 8px 0 !important;
+            }
+            
+            .stats-row-mobile > div {
+                padding: 8px 3px !important;
                 font-size: 0.8em !important;
             }
             
-            .late-entry-stats div[style*="font-size: 1.5em"] {
+            .stats-row-mobile div[style*="font-size: 1.5em"] {
                 font-size: 1em !important;
             }
         }
@@ -4987,7 +5020,7 @@
             const lateEntryHtml = `
                 <div style="background: ${lateCount > 0 ? '#fff3cd' : '#d4edda'}; border: 1px solid ${lateCount > 0 ? '#ffeaa7' : '#c3e6cb'}; border-radius: 8px; padding: 15px; margin: 15px 0;">
                     <h3>⏰ Thống Kê Nhập Liệu</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0;">
+                    <div class="stats-row-mobile" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0;">
                         <div style="text-align: center; background: #d4edda; padding: 10px; border-radius: 6px;">
                             <div style="font-size: 1.5em; font-weight: bold; color: #155724;">${onTimeCount}</div>
                             <div style="color: #155724;">Nhập đúng giờ ✅</div>
