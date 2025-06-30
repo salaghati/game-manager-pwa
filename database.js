@@ -1076,28 +1076,52 @@ class Database {
             console.log('🔍 PostgreSQL getDashboardData called with:', { branchId, startDate, endDate });
 
             // Query 1: Lấy các chỉ số tổng quan (doanh thu, xu vào/ra)
-            const statsParams = [];
-            let statsWhere = [];
+            let statsQuery, statsParams = [];
             
-            if (branchId) {
-                statsParams.push(branchId);
-                statsWhere.push(`branch_id = $${statsParams.length}`);
+            if (branchId && startDate && endDate) {
+                statsQuery = `
+                    SELECT 
+                        COALESCE(SUM(revenue), 0) AS total_revenue,
+                        COALESCE(SUM(coins_in), 0) AS total_coins_in,
+                        COALESCE(SUM(coins_out), 0) AS total_coins_out,
+                        COUNT(DISTINCT machine_id) AS total_machines_with_transactions
+                    FROM transactions
+                    WHERE branch_id = $1 AND transaction_date::date BETWEEN $2::date AND $3::date
+                `;
+                statsParams = [branchId, startDate, endDate];
+            } else if (branchId) {
+                statsQuery = `
+                    SELECT 
+                        COALESCE(SUM(revenue), 0) AS total_revenue,
+                        COALESCE(SUM(coins_in), 0) AS total_coins_in,
+                        COALESCE(SUM(coins_out), 0) AS total_coins_out,
+                        COUNT(DISTINCT machine_id) AS total_machines_with_transactions
+                    FROM transactions
+                    WHERE branch_id = $1
+                `;
+                statsParams = [branchId];
+            } else if (startDate && endDate) {
+                statsQuery = `
+                    SELECT 
+                        COALESCE(SUM(revenue), 0) AS total_revenue,
+                        COALESCE(SUM(coins_in), 0) AS total_coins_in,
+                        COALESCE(SUM(coins_out), 0) AS total_coins_out,
+                        COUNT(DISTINCT machine_id) AS total_machines_with_transactions
+                    FROM transactions
+                    WHERE transaction_date::date BETWEEN $1::date AND $2::date
+                `;
+                statsParams = [startDate, endDate];
+            } else {
+                statsQuery = `
+                    SELECT 
+                        COALESCE(SUM(revenue), 0) AS total_revenue,
+                        COALESCE(SUM(coins_in), 0) AS total_coins_in,
+                        COALESCE(SUM(coins_out), 0) AS total_coins_out,
+                        COUNT(DISTINCT machine_id) AS total_machines_with_transactions
+                    FROM transactions
+                `;
+                statsParams = [];
             }
-            
-            if (startDate && endDate) {
-                statsParams.push(startDate, endDate);
-                statsWhere.push(`transaction_date::date BETWEEN $${statsParams.length - 1}::date AND $${statsParams.length}::date`);
-            }
-
-            const statsQuery = `
-                SELECT 
-                    COALESCE(SUM(revenue), 0) AS total_revenue,
-                    COALESCE(SUM(coins_in), 0) AS total_coins_in,
-                    COALESCE(SUM(coins_out), 0) AS total_coins_out,
-                    COUNT(DISTINCT machine_id) AS total_machines_with_transactions
-                FROM transactions
-                ${statsWhere.length > 0 ? 'WHERE ' + statsWhere.join(' AND ') : ''}
-            `;
             
             console.log('🔍 Stats Query:', statsQuery);
             console.log('🔍 Stats Params:', statsParams);
@@ -1105,44 +1129,94 @@ class Database {
             const statsResult = await client.query(statsQuery, statsParams);
 
             // Query 2: Lấy tổng số máy của chi nhánh (không phụ thuộc ngày)
-            const totalMachinesQuery = `
-                SELECT COUNT(*) AS total_machines FROM machines ${branchId ? 'WHERE branch_id = $1' : ''}
-            `;
-            const totalMachinesResult = await client.query(totalMachinesQuery, branchId ? [branchId] : []);
+            let totalMachinesQuery, totalMachinesParams = [];
+            if (branchId) {
+                totalMachinesQuery = 'SELECT COUNT(*) AS total_machines FROM machines WHERE branch_id = $1';
+                totalMachinesParams = [branchId];
+            } else {
+                totalMachinesQuery = 'SELECT COUNT(*) AS total_machines FROM machines';
+                totalMachinesParams = [];
+            }
+            const totalMachinesResult = await client.query(totalMachinesQuery, totalMachinesParams);
             
             // Query 3: Lấy doanh thu chi tiết theo từng máy
-            const machinesParams = [];
-            let machinesWhere = [];
+            let machinesQuery, machinesParams = [];
             
-            if (branchId) {
-                machinesParams.push(branchId);
-                machinesWhere.push(`m.branch_id = $${machinesParams.length}`);
+            if (branchId && startDate && endDate) {
+                machinesQuery = `
+                    SELECT
+                        m.id,
+                        m.name,
+                        m.location,
+                        b.name as branch_name,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
+                        COUNT(t.id) as transaction_count
+                    FROM machines m
+                    LEFT JOIN transactions t ON m.id = t.machine_id AND t.transaction_date::date BETWEEN $2::date AND $3::date
+                    JOIN branches b ON m.branch_id = b.id
+                    WHERE m.branch_id = $1
+                    GROUP BY m.id, m.name, m.location, b.name
+                    ORDER BY total_revenue DESC
+                `;
+                machinesParams = [branchId, startDate, endDate];
+            } else if (branchId) {
+                machinesQuery = `
+                    SELECT
+                        m.id,
+                        m.name,
+                        m.location,
+                        b.name as branch_name,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
+                        COUNT(t.id) as transaction_count
+                    FROM machines m
+                    LEFT JOIN transactions t ON m.id = t.machine_id
+                    JOIN branches b ON m.branch_id = b.id
+                    WHERE m.branch_id = $1
+                    GROUP BY m.id, m.name, m.location, b.name
+                    ORDER BY total_revenue DESC
+                `;
+                machinesParams = [branchId];
+            } else if (startDate && endDate) {
+                machinesQuery = `
+                    SELECT
+                        m.id,
+                        m.name,
+                        m.location,
+                        b.name as branch_name,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
+                        COUNT(t.id) as transaction_count
+                    FROM machines m
+                    LEFT JOIN transactions t ON m.id = t.machine_id AND t.transaction_date::date BETWEEN $1::date AND $2::date
+                    JOIN branches b ON m.branch_id = b.id
+                    GROUP BY m.id, m.name, m.location, b.name
+                    ORDER BY total_revenue DESC
+                `;
+                machinesParams = [startDate, endDate];
+            } else {
+                machinesQuery = `
+                    SELECT
+                        m.id,
+                        m.name,
+                        m.location,
+                        b.name as branch_name,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                        COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
+                        COUNT(t.id) as transaction_count
+                    FROM machines m
+                    LEFT JOIN transactions t ON m.id = t.machine_id
+                    JOIN branches b ON m.branch_id = b.id
+                    GROUP BY m.id, m.name, m.location, b.name
+                    ORDER BY total_revenue DESC
+                `;
+                machinesParams = [];
             }
-            
-            // Date filter cho LEFT JOIN - chỉ áp dụng khi có transaction
-            let dateJoinCondition = 'm.id = t.machine_id';
-            if (startDate && endDate) {
-                machinesParams.push(startDate, endDate);
-                dateJoinCondition += ` AND (t.id IS NULL OR t.transaction_date::date BETWEEN $${machinesParams.length - 1}::date AND $${machinesParams.length}::date)`;
-            }
-
-            const machinesQuery = `
-                SELECT
-                    m.id,
-                    m.name,
-                    m.location,
-                    b.name as branch_name,
-                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
-                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
-                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
-                    COUNT(t.id) as transaction_count
-                FROM machines m
-                LEFT JOIN transactions t ON ${dateJoinCondition}
-                JOIN branches b ON m.branch_id = b.id
-                ${machinesWhere.length > 0 ? 'WHERE ' + machinesWhere.join(' AND ') : ''}
-                GROUP BY m.id, m.name, m.location, b.name
-                ORDER BY total_revenue DESC
-            `;
             
             console.log('🔍 Machines Query:', machinesQuery);
             console.log('🔍 Machines Params:', machinesParams);
