@@ -3061,57 +3061,250 @@
             }
         }
 
+        /* Doanh Thu Theo Máy - Desktop Layout */
+        .machine-revenue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .machine-item-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 2px solid #e5e7eb;
+            border-left: 6px solid #667eea;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .machine-item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .machine-item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #c7d2fe;
+        }
+
+        .machine-item-card .machine-name {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .machine-item-card .machine-name::before {
+            content: '🎮';
+            font-size: 1.3em;
+        }
+        
+        .machine-item-card .machine-location {
+            font-size: 0.9em;
+            color: #64748b;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .machine-item-card .machine-location::before {
+            content: '📍';
+            font-size: 0.9em;
+        }
+
+        .machine-item-card .machine-revenue {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin: 12px 0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid;
+        }
+
+        /* Revenue Status Colors - Desktop */
+        .machine-item-card .machine-revenue.positive {
+            color: #047857;
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-color: #10b981;
+        }
+
+        .machine-item-card .machine-revenue.negative {
+            color: #dc2626;
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            border-color: #ef4444;
+        }
+
+        .machine-item-card .machine-revenue.zero {
+            color: #6b7280;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-color: #d1d5db;
+        }
+
+        .machine-item-card .machine-details {
+            font-size: 0.9em;
+            color: #4b5563;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .machine-item-card .detail-item {
+            text-align: center;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        .machine-item-card .detail-item .label {
+            font-size: 0.8em;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .machine-item-card .detail-item .value {
+            font-weight: 700;
+            font-size: 1em;
+            color: #1e293b;
+        }
+
+        .machine-item-card .machine-transactions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.8em;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+
         /* Doanh Thu Theo Máy - Mobile Layout */
         @media (max-width: 767px) {
             .machine-revenue-grid {
                 display: grid;
-                grid-template-columns: repeat(2, 1fr); /* 2 cột trên mobile */
-                gap: 10px;
+                grid-template-columns: 1fr; /* 1 cột trên mobile để dễ nhìn */
+                gap: 12px;
             }
 
             .machine-item-card {
                 background: #fff;
-                border-radius: 8px;
-                padding: 12px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                border: 1px solid #e5e7eb;
-                text-align: center;
+                border-radius: 10px;
+                padding: 16px;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+                border: 2px solid #e5e7eb;
+                border-left: 5px solid #667eea;
+                text-align: left;
                 display: flex;
                 flex-direction: column;
-                gap: 4px;
+                gap: 8px;
+                margin-bottom: 8px;
             }
 
             .machine-item-card .machine-name {
-                font-size: 1em;
-                font-weight: 600;
+                font-size: 1.1em;
+                font-weight: 700;
                 line-height: 1.2;
+                color: #1e293b;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .machine-item-card .machine-name::before {
+                content: '🎮';
+                font-size: 1.2em;
             }
             
             .machine-item-card .machine-location {
-                font-size: 0.75em;
-                color: #6b7280;
+                font-size: 0.85em;
+                color: #64748b;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .machine-item-card .machine-location::before {
+                content: '📍';
+                font-size: 0.8em;
             }
 
             .machine-item-card .machine-revenue {
-                font-size: 1.5em;
-                font-weight: bold;
-                margin: 5px 0;
+                font-size: 1.4em;
+                font-weight: 700;
+                margin: 8px 0;
+                padding: 10px 12px;
+                border-radius: 8px;
+                text-align: center;
+                border: 2px solid;
             }
 
             .machine-item-card .machine-details {
-                font-size: 0.7em;
+                font-size: 0.8em;
                 color: #4b5563;
                 display: flex;
-                justify-content: space-around;
+                justify-content: space-between;
+                gap: 8px;
+                padding-top: 8px;
+                border-top: 1px solid #e5e7eb;
+            }
+
+            .machine-item-card .detail-item {
+                flex: 1;
+                text-align: center;
+                padding: 6px;
+                background: #f8fafc;
+                border-radius: 6px;
+            }
+
+            .machine-item-card .detail-item .label {
+                font-size: 0.7em;
+                color: #64748b;
+                font-weight: 500;
+                margin-bottom: 2px;
+            }
+
+            .machine-item-card .detail-item .value {
+                font-weight: 700;
+                font-size: 0.9em;
+                color: #1e293b;
             }
 
             .machine-item-card .machine-transactions {
+                position: absolute;
+                top: 16px;
+                right: 16px;
                 font-size: 0.7em;
                 color: #fff;
-                background-color: #6b7280;
-                padding: 2px 6px;
-                border-radius: 10px;
-                align-self: center;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-weight: 600;
             }
         }
 
@@ -3985,6 +4178,11 @@
             updateUIForUserRole();
             loadBranches();
             loadMachines();
+            // PATCH: show all machines for admin
+            if (currentUser && currentUser.role === 'admin') {
+                const dashboardBranchSelect = document.getElementById('dashboard_branch_id');
+                if (dashboardBranchSelect) dashboardBranchSelect.value = '';
+            }
             loadDashboard();
             setDefaultDates();
         }
@@ -4503,8 +4701,11 @@
             try {
                 const startDate = document.getElementById('start_date').value;
                 const endDate = document.getElementById('end_date').value;
-                const branchId = document.getElementById('dashboard_branch_id')?.value;
-                
+                let branchId = document.getElementById('dashboard_branch_id')?.value;
+                // PATCH: show all machines for admin
+                if (currentUser && currentUser.role === 'admin' && (!branchId || branchId === '')) {
+                    branchId = null;
+                }
                 // Debug dashboard params
                 const url = new URL(`${window.location.origin}/api/dashboard`);
                 if (startDate) url.searchParams.append('start_date', startDate);
@@ -4575,18 +4776,28 @@
                         const coinsIn = machine.total_coins_in || 0;
                         const coinsOut = machine.total_coins_out || 0;
                         const transactionCount = machine.transaction_count || 0;
-                        const revenueClass = revenue > 0 ? '#28a745' : revenue < 0 ? '#dc3545' : '#6c757d';
+                        
+                        // Xác định class cho revenue
+                        let revenueClass = 'zero';
+                        if (revenue > 0) revenueClass = 'positive';
+                        else if (revenue < 0) revenueClass = 'negative';
 
                         return `
                             <div class="machine-item-card">
-                                <strong class="machine-name">${machineName}</strong>
+                                <div class="machine-name">${machineName}</div>
                                 <div class="machine-location">${location}</div>
-                                <div class="machine-revenue" style="color: ${revenueClass};">
-                                    ${revenue > 0 ? '+' : ''}${revenue.toLocaleString()}
+                                <div class="machine-revenue ${revenueClass}">
+                                    ${revenue > 0 ? '+' : ''}${revenue.toLocaleString()} xu
                                 </div>
                                 <div class="machine-details">
-                                    <span>Vào: ${coinsIn.toLocaleString()}</span>
-                                    <span>Ra: ${coinsOut.toLocaleString()}</span>
+                                    <div class="detail-item">
+                                        <div class="label">Xu Vào</div>
+                                        <div class="value">${coinsIn.toLocaleString()}</div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <div class="label">Xu Ra</div>
+                                        <div class="value">${coinsOut.toLocaleString()}</div>
+                                    </div>
                                 </div>
                                 <div class="machine-transactions">${transactionCount} GD</div>
                             </div>
