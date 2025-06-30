@@ -1,106 +1,71 @@
-# Game Manager PWA 📱
+# Ứng dụng Quản lý Quán Game (Game Manager PWA) 🎮
 
-Ứng dụng quản lý máy chơi game được tối ưu cho mobile dưới dạng Progressive Web App (PWA).
+Một ứng dụng web tiến bộ (Progressive Web App - PWA) được thiết kế chuyên biệt để quản lý các mô hình kinh doanh cho thuê máy chơi game (ví dụ: quán PlayStation, PC gaming lounge). Ứng dụng giúp theo dõi trạng thái máy, quản lý phiên chơi của khách, tự động tính tiền và cung cấp báo cáo doanh thu, với giao diện được tối ưu cho nhân viên sử dụng trên điện thoại di động.
 
-## 🚀 Tính năng
+## 🚀 Tính năng cốt lõi
 
-- **📱 PWA Support**: Cài đặt như app thật trên điện thoại
-- **🔒 Phân quyền**: Manager và Employee roles
-- **📊 Nhập liệu**: Coin In/Out với tính toán profit tự động
-- **📈 Dashboard**: Thống kê doanh thu real-time
-- **📋 Lịch sử**: Xem lại các giao dịch đã nhập
-- **📱 Mobile-first**: UI được thiết kế ưu tiên cho mobile
-- **⚡ Offline Ready**: Service Worker cache
+- **📊 Quản lý Trạng thái Máy:** Theo dõi trực quan trạng thái của từng máy (Trống, Đang chơi, Cần bảo trì).
+- **⏱️ Quản lý Phiên chơi:** Dễ dàng bắt đầu và kết thúc một phiên chơi cho khách hàng, hệ thống tự động tính thời gian.
+- **💰 Tính tiền tự động:** Tự động tính tiền giờ chơi dựa trên bảng giá đã được cấu hình trước.
+- **🥤 Bán hàng kèm theo:** Cho phép thêm các sản phẩm như đồ ăn, nước uống vào hóa đơn của khách.
+- **🔒 Phân quyền Người dùng:** Tích hợp sẵn 2 vai trò:
+  - `Manager`: Toàn quyền truy cập, xem báo cáo doanh thu.
+  - `Employee`: Chỉ thực hiện các tác vụ vận hành hàng ngày.
+- **📈 Dashboard Báo cáo:** Bảng điều khiển trực quan để theo dõi doanh thu và hoạt động của quán trong ngày.
+- **📋 Lịch sử Giao dịch:** Xem lại lịch sử chi tiết của tất cả các phiên chơi và hóa đơn đã thanh toán.
+- **📱 Hỗ trợ PWA:** Có thể "cài đặt" ứng dụng lên màn hình chính của điện thoại, hỗ trợ truy cập offline cho các tính năng cơ bản.
 
-## 🛠️ Cài đặt
+## 🛠️ Công nghệ sử dụng
+
+- **Backend:** Node.js, Express.js
+- **Database:** Hỗ trợ PostgreSQL (cho production) và SQLite (cho local development).
+- **Frontend:** HTML, CSS, JavaScript, Service Worker.
+
+## ⚙️ Cài đặt & Khởi chạy
 
 ```bash
+# Di chuyển vào thư mục dự án
 cd game-manager-pwa
+
+# Cài đặt các gói phụ thuộc
 npm install
+
+# Khởi chạy server
 npm start
 ```
 
-Server sẽ chạy tại: http://localhost:3001
+Ứng dụng sẽ chạy tại địa chỉ: `http://localhost:3001`
 
-## 📱 Test trên điện thoại
+## 👨‍💻 Quy trình sử dụng
 
-### Cách 1: Local Network
-1. Tìm IP của máy tính (ví dụ: 192.168.1.100)
-2. Truy cập: `http://192.168.1.100:3001` trên điện thoại
-3. Chọn "Add to Home Screen" để cài đặt PWA
+1.  **Đăng nhập:** Sử dụng tài khoản có vai trò `Manager` hoặc `Employee`.
+2.  **Bắt đầu phiên chơi:** Chọn một máy đang ở trạng thái "Trống" để bắt đầu tính giờ cho khách.
+3.  **Thêm sản phẩm:** Trong khi khách chơi, có thể thêm đồ ăn, nước uống vào hóa đơn hiện tại.
+4.  **Kết thúc & Thanh toán:** Dừng phiên chơi. Hệ thống sẽ hiển thị tổng hóa đơn (tiền giờ + tiền sản phẩm) để nhân viên thanh toán với khách.
+5.  **Xem báo cáo (Manager):** Truy cập Dashboard để xem thống kê doanh thu và các số liệu quan trọng khác.
 
-### Cách 2: ngrok (Recommended)
+## 👤 Tài khoản Demo
+
+- **Manager**: `manager1` / `123456`
+- **Employee**: `nv001` / `123456`
+
+## 📱 Thử nghiệm trên điện thoại
+
+### Cách 1: Sử dụng mạng nội bộ (Local Network)
+1.  Tìm địa chỉ IP của máy tính trong mạng LAN (ví dụ: `192.168.1.100`).
+2.  Mở trình duyệt trên điện thoại và truy cập: `http://192.168.1.100:3001`.
+3.  Sử dụng tính năng "Thêm vào màn hình chính" (Add to Home Screen) của trình duyệt để cài đặt PWA.
+
+### Cách 2: Sử dụng ngrok (Khuyến khích)
+Công cụ này tạo một đường link công khai để bạn có thể truy cập server local từ bất kỳ đâu.
 ```bash
-# Install ngrok
+# Cài đặt ngrok (nếu chưa có)
 npm install -g ngrok
 
-# Expose local server
+# Public server ở port 3001
 ngrok http 3001
 ```
-Dùng URL ngrok để truy cập từ điện thoại.
-
-## 👤 Tài khoản demo
-
-- **Manager**: manager1 / 123456
-- **Employee**: nv001 / 123456
-
-## 📱 Tính năng PWA
-
-- ✅ Installable (Add to Home Screen)
-- ✅ Service Worker caching
-- ✅ Offline support
-- ✅ Mobile-optimized UI
-- ✅ Touch-friendly controls
-- ✅ Responsive design
-
-## 🔧 So sánh với web version
-
-| Tính năng | Web Version | PWA Version |
-|-----------|-------------|-------------|
-| Port | 3000 | 3001 |
-| UI | Desktop-first | Mobile-first |
-| Install | Không | Có (PWA) |
-| Offline | Không | Có (Service Worker) |
-| Complex features | Đầy đủ | Simplified |
-| Admin features | Có | Không (chỉ Manager/Employee) |
-
-## 📂 Cấu trúc
-
-```
-game-manager-pwa/
-├── server.js           # Express server với PWA manifest
-├── database.js         # Copy từ project gốc
-├── game_machine.db     # Copy database
-├── public/
-│   ├── index.html      # Mobile-optimized HTML
-│   ├── sw.js          # Service Worker
-│   ├── manifest.json   # PWA Manifest (auto-generated)
-│   └── icons/         # PWA icons
-├── package.json
-└── README.md
-```
-
-## 🎯 Sử dụng
-
-1. **Đăng nhập** với tài khoản demo
-2. **Nhập liệu**: Chọn máy, nhập coin in/out, xem profit tự động
-3. **Dashboard**: Xem thống kê doanh thu (chỉ Manager)
-4. **Lịch sử**: Xem các giao dịch đã nhập
-
-## 💡 Tips
-
-- Sử dụng date picker để chọn ngày giao dịch chính xác
-- Profit được tính tự động: Coin In - Coin Out
-- Dữ liệu được sync với server gốc (cùng database)
-- UI được tối ưu cho touch controls
-
-## 🐛 Debug
-
-Nếu gặp lỗi:
-1. Check console log trong browser
-2. Verify database connection
-3. Restart server: `npm start`
+Sử dụng đường link mà ngrok cung cấp để truy cập từ điện thoại.
 
 ---
-
-**Phát triển bởi Game Manager Team** 🎮 
+*Được phát triển với mục tiêu đơn giản hóa việc quản lý vận hành cho các quán game.* 
