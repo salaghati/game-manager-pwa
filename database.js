@@ -983,68 +983,181 @@ class Database {
         }
     }
 
+    async getDashboardDataSQLite(branchId = null, startDate = null, endDate = null) {
+        return new Promise((resolve, reject) => {
+            // Query 1: Lấy các chỉ số tổng quan
+            const statsParams = [];
+            let statsWhereClauses = [];
+            if (branchId) {
+                statsParams.push(branchId);
+                statsWhereClauses.push(`branch_id = ?`);
+            }
+            if (startDate && endDate) {
+                statsParams.push(startDate, endDate);
+                statsWhereClauses.push(`DATE(transaction_date) BETWEEN DATE(?) AND DATE(?)`);
+            }
+            const statsQuery = `
+                SELECT 
+                    COALESCE(SUM(revenue), 0) AS total_revenue,
+                    COALESCE(SUM(coins_in), 0) AS total_coins_in,
+                    COALESCE(SUM(coins_out), 0) AS total_coins_out,
+                    COUNT(DISTINCT machine_id) AS total_machines_with_transactions
+                FROM transactions
+                ${statsWhereClauses.length > 0 ? 'WHERE ' + statsWhereClauses.join(' AND ') : ''}
+            `;
+
+            this.db.get(statsQuery, statsParams, (err, statsRow) => {
+                if (err) {
+                    console.error('Error in getDashboardDataSQLite stats:', err);
+                    reject(err);
+                    return;
+                }
+
+                // Query 2: Lấy tổng số máy của chi nhánh
+                const totalMachinesQuery = `SELECT COUNT(*) AS total_machines FROM machines${branchId ? ' WHERE branch_id = ?' : ''}`;
+                this.db.get(totalMachinesQuery, branchId ? [branchId] : [], (err, totalRow) => {
+                    if (err) {
+                        console.error('Error in getDashboardDataSQLite total machines:', err);
+                        reject(err);
+                        return;
+                    }
+
+                    // Query 3: Lấy doanh thu chi tiết theo từng máy
+                    const machinesParams = [];
+                    let machinesWhere = [];
+                    if (branchId) {
+                        machinesParams.push(branchId);
+                        machinesWhere.push('m.branch_id = ?');
+                    }
+                    if (startDate && endDate) {
+                        machinesParams.push(startDate, endDate);
+                        machinesWhere.push('(t.id IS NULL OR DATE(t.transaction_date) BETWEEN DATE(?) AND DATE(?))');
+                    }
+
+                    const machinesQuery = `
+                        SELECT
+                            m.id,
+                            m.name,
+                            m.location,
+                            b.name as branch_name,
+                            COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
+                            COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                            COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
+                            COUNT(t.id) as transaction_count
+                        FROM machines m
+                        LEFT JOIN transactions t ON m.id = t.machine_id
+                        JOIN branches b ON m.branch_id = b.id
+                        ${machinesWhere.length > 0 ? 'WHERE ' + machinesWhere.join(' AND ') : ''}
+                        GROUP BY m.id, b.name
+                        ORDER BY total_revenue DESC
+                    `;
+
+                    this.db.all(machinesQuery, machinesParams, (err, machinesRows) => {
+                        if (err) {
+                            console.error('Error in getDashboardDataSQLite machines:', err);
+                            reject(err);
+                            return;
+                        }
+
+                        resolve({
+                            ...statsRow,
+                            total_machines: totalRow.total_machines,
+                            machines: machinesRows
+                        });
+                    });
+                });
+            });
+        });
+    }
+
     async getDashboardDataPostgres(branchId = null, startDate = null, endDate = null) {
         const client = await this.pool.connect();
         try {
-            const params = [];
-            let dateFilter = '';
-            if (startDate && endDate) {
-                params.push(startDate, endDate);
-                dateFilter = `AND t.transaction_date BETWEEN $${params.length - 1} AND $${params.length}`;
-            }
-
-            let branchFilter = '';
-            if (branchId) {
-                params.push(branchId);
-                branchFilter = `WHERE t.branch_id = $${params.length}`;
-            }
-            
-            let machineBranchFilter = branchId ? `WHERE branch_id = $${params.length}` : '';
-
+            console.log('🔍 PostgreSQL getDashboardData called with:', { branchId, startDate, endDate });
 
             // Query 1: Lấy các chỉ số tổng quan (doanh thu, xu vào/ra)
+            const statsParams = [];
+            let statsWhere = [];
+            
+            if (branchId) {
+                statsParams.push(branchId);
+                statsWhere.push(`branch_id = $${statsParams.length}`);
+            }
+            
+            if (startDate && endDate) {
+                statsParams.push(startDate, endDate);
+                statsWhere.push(`transaction_date::date BETWEEN $${statsParams.length - 1}::date AND $${statsParams.length}::date`);
+            }
+
             const statsQuery = `
                 SELECT 
-                    COALESCE(SUM(t.revenue), 0) AS total_revenue,
-                    COALESCE(SUM(t.coins_in), 0) AS total_coins_in,
-                    COALESCE(SUM(t.coins_out), 0) AS total_coins_out,
-                    COUNT(DISTINCT t.machine_id) AS total_machines_with_transactions
-                FROM transactions t
-                ${branchFilter.replace('t.', '')} ${dateFilter.replace('t.', '')};
+                    COALESCE(SUM(revenue), 0) AS total_revenue,
+                    COALESCE(SUM(coins_in), 0) AS total_coins_in,
+                    COALESCE(SUM(coins_out), 0) AS total_coins_out,
+                    COUNT(DISTINCT machine_id) AS total_machines_with_transactions
+                FROM transactions
+                ${statsWhere.length > 0 ? 'WHERE ' + statsWhere.join(' AND ') : ''}
             `;
-            const statsResult = await client.query(statsQuery, params);
+            
+            console.log('🔍 Stats Query:', statsQuery);
+            console.log('🔍 Stats Params:', statsParams);
+            
+            const statsResult = await client.query(statsQuery, statsParams);
 
             // Query 2: Lấy tổng số máy của chi nhánh (không phụ thuộc ngày)
             const totalMachinesQuery = `
-                SELECT COUNT(*) AS total_machines FROM machines ${machineBranchFilter.replace('t.', 'm.')};
+                SELECT COUNT(*) AS total_machines FROM machines ${branchId ? 'WHERE branch_id = $1' : ''}
             `;
             const totalMachinesResult = await client.query(totalMachinesQuery, branchId ? [branchId] : []);
             
             // Query 3: Lấy doanh thu chi tiết theo từng máy
+            const machinesParams = [];
+            let machinesWhere = [];
+            
+            if (branchId) {
+                machinesParams.push(branchId);
+                machinesWhere.push(`m.branch_id = $${machinesParams.length}`);
+            }
+            
+            // Date filter cho LEFT JOIN - chỉ áp dụng khi có transaction
+            let dateJoinCondition = 'm.id = t.machine_id';
+            if (startDate && endDate) {
+                machinesParams.push(startDate, endDate);
+                dateJoinCondition += ` AND (t.id IS NULL OR t.transaction_date::date BETWEEN $${machinesParams.length - 1}::date AND $${machinesParams.length}::date)`;
+            }
+
             const machinesQuery = `
                 SELECT
                     m.id,
                     m.name,
                     m.location,
                     b.name as branch_name,
-                    COALESCE(SUM(t.revenue), 0) as total_revenue,
-                    COALESCE(SUM(t.coins_in), 0) as total_coins_in,
-                    COALESCE(SUM(t.coins_out), 0) as total_coins_out,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.revenue ELSE 0 END), 0) as total_revenue,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_in ELSE 0 END), 0) as total_coins_in,
+                    COALESCE(SUM(CASE WHEN t.id IS NOT NULL THEN t.coins_out ELSE 0 END), 0) as total_coins_out,
                     COUNT(t.id) as transaction_count
                 FROM machines m
-                LEFT JOIN transactions t ON m.id = t.machine_id ${dateFilter}
+                LEFT JOIN transactions t ON ${dateJoinCondition}
                 JOIN branches b ON m.branch_id = b.id
-                ${branchId ? `WHERE m.branch_id = $1` : ''}
-                GROUP BY m.id, b.name
-                ORDER BY total_revenue DESC;
+                ${machinesWhere.length > 0 ? 'WHERE ' + machinesWhere.join(' AND ') : ''}
+                GROUP BY m.id, m.name, m.location, b.name
+                ORDER BY total_revenue DESC
             `;
-            const machinesResult = await client.query(machinesQuery, branchId ? [branchId] : []);
-
-            return {
+            
+            console.log('🔍 Machines Query:', machinesQuery);
+            console.log('🔍 Machines Params:', machinesParams);
+            
+            const machinesResult = await client.query(machinesQuery, machinesParams);
+            
+            const result = {
                 ...statsResult.rows[0],
-                total_machines: totalMachinesResult.rows[0].total_machines,
+                total_machines: parseInt(totalMachinesResult.rows[0].total_machines),
                 machines: machinesResult.rows
             };
+            
+            console.log('🔍 Dashboard result:', result);
+
+            return result;
         } finally {
             client.release();
         }
