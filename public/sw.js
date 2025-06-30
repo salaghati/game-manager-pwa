@@ -1,4 +1,5 @@
-const CACHE_NAME = `game-manager-pwa-v1.0.0-${Date.now()}`;
+const CACHE_VERSION = '{{CACHE_VERSION}}';
+const CACHE_NAME = `game-manager-pwa-${CACHE_VERSION}`;
 const urlsToCache = [
     '/',
     '/index.html',

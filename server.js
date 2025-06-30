@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const session = require('express-session');
 const Database = require('./database');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Railway sẽ set PORT environment variable
@@ -21,6 +22,17 @@ app.use(session({
     saveUninitialized: false,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
 }));
+
+// Middleware để disable cache cho các file quan trọng
+app.use((req, res, next) => {
+    if (req.url === '/' || req.url === '/index.html' || req.url === '/sw.js') {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store');
+    }
+    next();
+});
 
 // Serve PWA static files with cache control
 app.use(express.static('public', {
@@ -65,10 +77,18 @@ app.get('/manifest.json', (req, res) => {
     });
 });
 
-// Service Worker
+// Route đặc biệt cho service worker để chèn version
 app.get('/sw.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.sendFile(path.join(__dirname, 'public', 'sw.js'));
+    const swPath = path.join(__dirname, 'public', 'sw.js');
+    fs.readFile(swPath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Could not read sw.js file:', err);
+            return res.status(500).send('Could not read sw.js file');
+        }
+        res.setHeader('Content-Type', 'application/javascript');
+        const newData = data.replace('{{CACHE_VERSION}}', Date.now());
+        res.send(newData);
+    });
 });
 
 // Health check endpoint for auto-detection
