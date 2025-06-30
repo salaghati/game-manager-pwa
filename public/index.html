@@ -3114,6 +3114,63 @@
                 align-self: center;
             }
         }
+
+        /* Action Buttons - Mobile Layout */
+        @media (max-width: 767px) {
+            .action-buttons-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+            .button-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .button-row > div { /* Ensure wrappers take full width */
+                width: 100%;
+                display: contents; /* Makes the wrapper act like it's not there */
+            }
+
+            .btn-full-width, .btn-half-width {
+                width: 100%;
+                padding: 12px;
+                font-size: 1em;
+                font-weight: 600;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                text-align: center;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+
+            .btn-full-width {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            
+            .btn-half-width {
+                background-color: #28a745;
+                color: white;
+            }
+
+            .btn-danger {
+                background-color: #dc3545;
+                color: white;
+            }
+            
+            .btn-secondary {
+                background-color: #6c757d;
+                color: white;
+            }
+
+            .btn-full-width:active, .btn-half-width:active {
+                transform: scale(0.98);
+            }
+        }
     </style>
 </head>
 <body>
@@ -3229,25 +3286,27 @@
                 </div>
                 
                 <!-- Action Buttons -->
-                <div class="action-buttons" style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                    <button type="button" class="btn enhanced-btn primary-btn" onclick="loadDashboard()" style="background: #667eea; flex: 1; min-width: 120px;">
+                <div class="action-buttons-container">
+                    <button type="button" class="btn-full-width" onclick="loadDashboard()">
                         🔍 CẬP NHẬT BÁO CÁO
                     </button>
-                    <div id="export_section" style="display: none;">
-                        <button type="button" class="btn enhanced-btn success-btn" onclick="exportCurrentData()" style="background: #28a745; min-width: 140px;">
-                            📄 Export Excel
-                        </button>
+                    <div class="button-row">
+                        <div id="export_section" style="display: none;">
+                            <button type="button" class="btn-half-width" onclick="exportCurrentData()">
+                                📄 Export Excel
+                            </button>
+                        </div>
+                        <div id="reset_section" style="display: none;">
+                            <button type="button" class="btn-half-width btn-danger" onclick="resetData()">
+                                🗑️ Reset Dữ Liệu
+                            </button>
+                        </div>
                     </div>
-                    <div id="reset_section" style="display: none;">
-                        <button type="button" class="btn" onclick="resetData()" style="background: #dc3545; min-width: 120px;">
-                            🗑️ Reset Dữ Liệu
-                        </button>
-                    </div>
-                    <div style="flex: 1; text-align: right; display: flex !important; gap: 10px; justify-content: flex-end; visibility: visible !important;">
-                        <button type="button" onclick="forceClearCache()" style="background: #dc3545 !important; color: white !important; border: none !important; padding: 8px 12px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 0.85em !important; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">
+                    <div class="button-row">
+                        <button type="button" class="btn-half-width btn-danger" onclick="forceClearCache()">
                             🗑️ CLEAR CACHE
                         </button>
-                        <button type="button" id="toggle-advanced" onclick="toggleAdvancedFilters()" style="background: #6c757d !important; color: white !important; border: none !important; padding: 8px 15px !important; border-radius: 6px !important; cursor: pointer !important; font-size: 0.9em !important; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">
+                        <button type="button" class="btn-half-width btn-secondary" id="toggle-advanced" onclick="toggleAdvancedFilters()">
                             🔧 BỘ LỌC <span id="toggle-icon">▼</span>
                         </button>
                     </div>
