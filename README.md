@@ -1,18 +1,22 @@
-# Ứng dụng Quản lý Quán Game (Game Manager PWA)
+# Quản Lý Máy Chơi Game
 
-Một ứng dụng web tiến bộ (Progressive Web App - PWA) được thiết kế chuyên biệt để quản lý các mô hình kinh doanh cho thuê máy chơi game (ví dụ: quán PlayStation, PC gaming lounge). Ứng dụng giúp theo dõi trạng thái máy, quản lý phiên chơi của khách, tự động tính tiền và cung cấp báo cáo doanh thu, với giao diện được tối ưu cho nhân viên sử dụng trên điện thoại di động.
+Một ứng dụng web tiến bộ (PWA) được thiết kế để theo dõi và quản lý doanh thu từ các máy game, dựa trên nghiệp vụ nhập liệu "Coin In" (xu vào) và "Coin Out" (xu ra).
+
+## Live Demo
+
+Bạn có thể trải nghiệm phiên bản live của ứng dụng tại địa chỉ:
+
+**[https://game-manager-pwa-production-40d9.up.railway.app/](https://game-manager-pwa-production-40d9.up.railway.app/)**
 
 ## Tính năng cốt lõi
 
-- **Quản lý Trạng thái Máy:** Theo dõi trực quan trạng thái của từng máy (Trống, Đang chơi, Cần bảo trì).
-- **Quản lý Phiên chơi:** Dễ dàng bắt đầu và kết thúc một phiên chơi cho khách hàng, hệ thống tự động tính thời gian.
-- **Tính tiền tự động:** Tự động tính tiền giờ chơi dựa trên bảng giá đã được cấu hình trước.
-- **Phân quyền Người dùng:** Tích hợp sẵn 2 vai trò:
-  - `Manager`: Toàn quyền truy cập, xem báo cáo doanh thu.
-  - `Employee`: Chỉ thực hiện các tác vụ vận hành hàng ngày.
-- **Dashboard Báo cáo:** Bảng điều khiển trực quan để theo dõi doanh thu và hoạt động của quán trong ngày.
-- **Lịch sử Giao dịch:** Xem lại lịch sử chi tiết của tất cả các phiên chơi và hóa đơn đã thanh toán.
-- **Hỗ trợ PWA:** Có thể "cài đặt" ứng dụng lên màn hình chính của điện thoại, hỗ trợ truy cập offline cho các tính năng cơ bản.
+- **Nhập liệu Coin In/Out:** Giao diện đơn giản để nhân viên nhập tổng số xu vào và xu ra của từng máy vào cuối ngày hoặc cuối ca làm việc.
+- **Tự động tính và lưu trữ lợi nhuận:** Hệ thống tự động tính `Profit = Coin In - Coin Out` và lưu vào cơ sở dữ liệu cho mỗi lần nhập liệu.
+- **Dashboard Doanh thu:** Cung cấp cái nhìn tổng quan về doanh thu và lợi nhuận theo ngày, tuần, tháng với các bộ lọc trực quan.
+- **Xuất file Excel:** Cho phép người quản lý xuất dữ liệu báo cáo ra file Excel để phân tích hoặc lưu trữ.
+- **Lịch sử Giao dịch Nâng cao:** Lưu trữ và cho phép tìm kiếm, lọc lại toàn bộ lịch sử giao dịch với các bộ lọc chi tiết như `Chi nhánh`, `Máy`, `Nhân viên`, `Ngày tháng`, và trạng thái `Nhập muộn/Đúng giờ`.
+- **Phân quyền Người dùng:** Hỗ trợ vai trò `Manager` (xem báo cáo, xuất file) và `Employee` (chỉ nhập liệu).
+- **Hỗ trợ PWA:** Có thể cài đặt lên màn hình chính điện thoại để truy cập nhanh chóng.
 
 ## Công nghệ & Kiến trúc Hệ thống
 
@@ -52,9 +56,16 @@ npm start
 ## Quy trình sử dụng
 
 1.  **Đăng nhập:** Sử dụng tài khoản có vai trò `Manager` hoặc `Employee`.
-2.  **Bắt đầu phiên chơi:** Chọn một máy đang ở trạng thái "Trống" để bắt đầu tính giờ cho khách.
-3.  **Kết thúc & Thanh toán:** Dừng phiên chơi. Hệ thống sẽ hiển thị tổng hóa đơn tiền giờ để nhân viên thanh toán với khách.
-4.  **Xem báo cáo (Manager):** Truy cập Dashboard để xem thống kê doanh thu và các số liệu quan trọng khác.
+2.  **Nhập liệu:**
+    -   Vào tab "Nhập Liệu".
+    -   Chọn Chi nhánh, Máy và Ngày giao dịch.
+    -   Điền thông tin `Coin In` (xu vào) và `Coin Out` (xu ra).
+    -   Nhấn "Lưu Giao Dịch".
+3.  **Xem báo cáo (Manager):**
+    -   Truy cập "Dashboard" để xem thống kê doanh thu.
+    -   Sử dụng các bộ lọc nhanh hoặc tùy chỉnh theo ngày và nhấn "Cập nhật báo cáo".
+    -   Nhấn "Export Excel" để tải về file báo cáo.
+4.  **Tra cứu (Manager):** Vào "Lịch Sử" để tìm kiếm và lọc các giao dịch cũ theo nhiều tiêu chí.
 
 ## Tài khoản Demo
 
