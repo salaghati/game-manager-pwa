@@ -3060,6 +3060,60 @@
                 margin-bottom: 4px;
             }
         }
+
+        /* Doanh Thu Theo Máy - Mobile Layout */
+        @media (max-width: 767px) {
+            .machine-revenue-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr); /* 2 cột trên mobile */
+                gap: 10px;
+            }
+
+            .machine-item-card {
+                background: #fff;
+                border-radius: 8px;
+                padding: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                border: 1px solid #e5e7eb;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .machine-item-card .machine-name {
+                font-size: 1em;
+                font-weight: 600;
+                line-height: 1.2;
+            }
+            
+            .machine-item-card .machine-location {
+                font-size: 0.75em;
+                color: #6b7280;
+            }
+
+            .machine-item-card .machine-revenue {
+                font-size: 1.5em;
+                font-weight: bold;
+                margin: 5px 0;
+            }
+
+            .machine-item-card .machine-details {
+                font-size: 0.7em;
+                color: #4b5563;
+                display: flex;
+                justify-content: space-around;
+            }
+
+            .machine-item-card .machine-transactions {
+                font-size: 0.7em;
+                color: #fff;
+                background-color: #6b7280;
+                padding: 2px 6px;
+                border-radius: 10px;
+                align-self: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -4415,70 +4469,34 @@
                 console.log('🔍 DEBUG machinesArray length:', machinesArray.length);
                 
                 if (machinesArray && machinesArray.length > 0) {
-                    console.log('✅ Có', machinesArray.length, 'máy để hiển thị');
-                    
-                    // Store dashboard machines để so sánh với recent transactions
-                    window.lastDashboardMachines = machinesArray;
-                    
-                    // Sort machines theo doanh thu giảm dần
                     const sortedMachines = machinesArray.sort((a, b) => (b.total_revenue || 0) - (a.total_revenue || 0));
                     
-                    sortedMachines.forEach((machine, index) => {
-                        const machineName = machine.machine_name || machine.name || 'Máy không xác định';
-                        const location = machine.location || 'Vị trí không xác định';
-                        const branchName = machine.branch_name || 'Chi nhánh không xác định';
+                    const machineItemsHtml = sortedMachines.map((machine, index) => {
+                        const machineName = machine.machine_name || machine.name || 'Máy';
+                        const location = machine.location || 'N/A';
                         const revenue = machine.total_revenue || 0;
                         const coinsIn = machine.total_coins_in || 0;
                         const coinsOut = machine.total_coins_out || 0;
                         const transactionCount = machine.transaction_count || 0;
-                        
-                        // DEBUG: Log machine info
-                        console.log(`🎮 Machine ${index}:`, {
-                            raw_machine_object: machine,
-                            name: machineName,
-                            original_name: machine.name,
-                            machine_name_field: machine.machine_name,
-                            location: location,
-                            branch: branchName,
-                            revenue: revenue,
-                            transactions: transactionCount
-                        });
-                        
-                        // Tính tỷ lệ thắng/thua cho máy
-                        const winRate = coinsIn > 0 ? ((revenue / coinsIn) * 100).toFixed(1) : '0.0';
                         const revenueClass = revenue > 0 ? '#28a745' : revenue < 0 ? '#dc3545' : '#6c757d';
-                        const revenueIcon = revenue > 0 ? '📈' : revenue < 0 ? '📉' : '➖';
-                        
-                        revenueHtml += `
-                            <div class="machine-item" style="margin-bottom: 10px;">
-                                <div style="flex: 1; min-width: 0; word-wrap: break-word; overflow-wrap: anywhere;">
-                                    <strong style="font-size: 16px; font-weight: 900; color: #111827; display: block; margin-bottom: 3px; white-space: normal; line-height: 1.2;">${machineName}</strong>
-                                    <div style="font-size: 13px; color: #4b5563; font-weight: 600; margin-bottom: 2px;">Vị trí: ${location}</div>
-                                    <div style="font-size: 12px; color: #6b7280; font-weight: 500; margin-bottom: 2px;">${transactionCount} giao dịch</div>
-                                    <div style="font-size: 11px; color: #059669; font-weight: 600; font-family: monospace;">ID: ${machine.id || machine.machine_id || 'N/A'}</div>
+
+                        return `
+                            <div class="machine-item-card">
+                                <strong class="machine-name">${machineName}</strong>
+                                <div class="machine-location">${location}</div>
+                                <div class="machine-revenue" style="color: ${revenueClass};">
+                                    ${revenue > 0 ? '+' : ''}${revenue.toLocaleString()}
                                 </div>
-                                <div class="revenue-stats" style="min-width: 100px; text-align: right;">
-                                    <div class="revenue-amount" style="color: ${revenueClass}; font-size: 18px; font-weight: 900; margin-bottom: 3px;">
-                                        ${revenue > 0 ? '+' : ''}${Math.abs(revenue).toLocaleString()}
-                                    </div>
-                                    <div class="revenue-details" style="font-size: 11px; color: #4b5563; margin-bottom: 2px;">
-                                        Vào: ${coinsIn.toLocaleString()}
-                                    </div>
-                                    <div class="revenue-details" style="font-size: 11px; color: #4b5563; margin-bottom: 2px;">
-                                        Ra: ${coinsOut.toLocaleString()}
-                                    </div>
-                                    <div class="revenue-badge" style="background: ${revenue > 0 ? '#d4edda' : revenue < 0 ? '#f8d7da' : '#e9ecef'}; 
-                                                 color: ${revenue > 0 ? '#155724' : revenue < 0 ? '#721c24' : '#495057'}; 
-                                                 padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">
-                                        Tỷ lệ: ${winRate}%
-                                    </div>
+                                <div class="machine-details">
+                                    <span>Vào: ${coinsIn.toLocaleString()}</span>
+                                    <span>Ra: ${coinsOut.toLocaleString()}</span>
                                 </div>
+                                <div class="machine-transactions">${transactionCount} GD</div>
                             </div>
                         `;
-                    });
-                    
-                    console.log('✅ Generated HTML for', sortedMachines.length, 'machines');
-                    console.log('🔍 First machine HTML preview:', revenueHtml.substring(revenueHtml.length - 200));
+                    }).join('');
+
+                    revenueHtml += `<div class="machine-revenue-grid">${machineItemsHtml}</div>`;
                 } else {
                     console.log('❌ Không có machines data, hiển thị fallback');
                     console.log('🔍 DEBUG data object keys:', Object.keys(data));
