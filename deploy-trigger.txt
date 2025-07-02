@@ -1,7 +1,2 @@
-deploy-trigger-dashboard-fix-20250625_092222
-
-Deploy trigger: 2025-01-27 18:05:00
-iPhone layout optimization deployment
-Force CSS update for horizontal layout
-Railway redeploy trigger - app seems down
-Debug mode activation
+Deploy trigger: 2025-07-02 11:03:45
+Reset to commit a5e0c0d - admin dashboard patch
